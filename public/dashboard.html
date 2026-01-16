@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyVID Dashboard</title>
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+  <div class="container">
+    <h1>MyVID Dashboard</h1>
+    <p class="intro">
+      This is your safe space to manage your emergency identity.  
+      Only the details you choose will be visible when needed.
+    </p>
+
+    <!-- Personal Info -->
+    <section id="personal-info">
+      <h2>Personal Information</h2>
+      <form id="personal-form">
+        <label for="firstName">First Name</label>
+        <input type="text" id="firstName" placeholder="Enter your first name">
+
+        <label for="country">Country</label>
+        <input type="text" id="country" placeholder="Enter your Country">
+
+        <label for="photo">Profile Photo</label>
+        <input type="file" id="photo">
+
+        <button type="submit">Save Personal Info</button>
+      </form>
+    </section>
+
+    <!-- Emergency Contacts -->
+    <section id="emergency-contacts">
+      <h2>Emergency Contacts</h2>
+      <p class="section-note">Add trusted people who can be reached in case of emergency.</p>
+      <div id="contacts-list"></div>
+      <form id="contact-form">
+        <label for="contact-name">Name</label>
+        <input type="text" id="contact-name" placeholder="Contact name">
+
+        <label for="contact-phone">Phone</label>
+        <input type="text" id="contact-phone" placeholder="Contact phone number">
+
+        <label><input type="checkbox" id="contact-public"> Make this contact visible publicly</label>
+
+        <button type="submit">Add Contact</button>
+      </form>
+    </section>
+
+    <!-- Medical -->
+    <section id="medical">
+      <h2>Medical Information</h2>
+      <p class="section-note">Share alerts that responders should know. Private notes remain visible only to you.</p>
+      <form id="medical-form">
+        <label for="medical-alert">Medical Alert</label>
+        <input type="text" id="medical-alert" placeholder="e.g. Allergic to penicillin">
+        <button type="button" id="add-alert">Add Alert</button>
+
+        <div id="alerts-list"></div>
+
+        <label for="medical-notes">Private Notes</label>
+        <textarea id="medical-notes" placeholder="Add private notes here"></textarea>
+
+        <button type="submit">Save Medical Info</button>
+      </form>
+    </section>
+
+    <!-- Full Details -->
+    <section id="full-details">
+      <h2>Full Details (Private)</h2>
+      <p class="section-note">These details are stored securely and are not shared publicly.</p>
+      <form id="full-form">
+        <label for="lastName">Last Name</label>
+        <input type="text" id="lastName" placeholder="Enter your last name">
+
+        <label for="address">Address</label>
+        <input type="text" id="address" placeholder="Enter your address">
+
+        <label for="dob">Date of Birth</label>
+        <input type="date" id="dob" title="Date of Birth">
+
+        <button type="submit">Save Full Details</button>
+      </form>
+    </section>
+
+    <!-- QR Section -->
+    <section id="qr-section">
+      <h2>Your QR Code</h2>
+      <p class="section-note">Generate a QR code that shares only the emergency details you’ve chosen.</p>
+      <button id="generate-qr">Generate QR</button>
+      <button id="toggle-qr">Disable QR</button>
+      <a id="download-svg" style="display:none">Download as SVG</a>
+      <a id="download-png" style="display:none">Download as PNG</a>
+      <img id="qr-preview" alt="QR Preview">
+    </section>
+
+    <!-- Logout -->
+    <button id="logout">Logout</button>
+  </div>
+
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

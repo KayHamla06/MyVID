@@ -1,0 +1,157 @@
+/* ============================
+   MYVID Dashboard Theme
+   ============================ */
+
+/* Variables */
+:root {
+  --color-bg: #f6f4ef;            /* warm off-white background */
+  --color-surface: #ffffff;       /* card surface */
+  --color-primary: #5fa7b4;       /* soft teal */
+  --color-primary-hover: #4b93a0; /* deeper teal */
+  --color-accent: #a7a6d9;        /* lavender reassurance */
+  --color-text: #2f3a3c;          /* deep slate */
+  --color-text-muted: #5b6a6d;    /* muted text */
+  --color-border: #e3dfd6;        /* soft border */
+  --shadow-soft: 0 2px 8px rgba(34, 46, 49, 0.08);
+  --shadow-medium: 0 6px 16px rgba(34, 46, 49, 0.12);
+
+  --font-family: "Nunito", "Segoe UI", Arial, sans-serif;
+  --radius: 12px;
+  --transition: 180ms ease;
+}
+
+/* Global styles */
+body {
+  font-family: var(--font-family);
+  background: var(--color-bg);
+  color: var(--color-text);
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+/* Container */
+.container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+}
+.intro {
+  font-size: 1.1em;
+  color: var(--color-text-muted);
+  margin-bottom: 30px;
+}
+
+/* Sections */
+section {
+  margin-bottom: 25px;
+  padding: 20px;
+  background: #fbfaf7;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+}
+
+.section-note {
+  font-size: 0.95em;
+  color: var(--color-text-muted);
+  margin-top: 10px;
+}
+
+/* Headings */
+section h2 {
+  margin-bottom: 12px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* Forms */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+label {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* Inputs */
+input, textarea {
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: #fcfbf8;
+  color: var(--color-text);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(95, 167, 180, 0.15);
+}
+
+/* Buttons */
+button {
+  padding: 12px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+
+button:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-medium);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Lists */
+#contacts-list, #alerts-list {
+  margin-bottom: 15px;
+  padding: 12px;
+  background: #f9f8f5;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+}
+
+/* QR Preview */
+#qr-preview {
+  max-width: 220px;
+  margin: 20px auto;
+  display: block;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius);
+  padding: 10px;
+  background: #fff;
+  box-shadow: var(--shadow-soft);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .container {
+    padding: 20px;
+    margin: 20px;
+  }
+  section {
+    padding: 15px;
+  }
+}

@@ -1,0 +1,143 @@
+/* ============================
+   MYVID Login Page Theme
+   ============================ */
+
+/* Variables */
+:root {
+  --color-bg: #f6f4ef;            /* warm off-white background */
+  --color-surface: #ffffff;       /* card surface */
+  --color-primary: #5fa7b4;       /* soft teal */
+  --color-primary-hover: #4b93a0; /* deeper teal */
+  --color-accent: #a7a6d9;        /* lavender reassurance */
+  --color-text: #2f3a3c;          /* deep slate */
+  --color-text-muted: #5b6a6d;    /* muted text */
+  --color-border: #e3dfd6;        /* soft border */
+  --shadow-soft: 0 2px 8px rgba(34, 46, 49, 0.08);
+
+  --font-family: "Nunito", "Segoe UI", Arial, sans-serif;
+  --radius: 12px;
+  --transition: 180ms ease;
+}
+
+/* Global styles */
+body {
+  font-family: var(--font-family);
+  background: var(--color-bg);
+  color: var(--color-text);
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+/* Container */
+.container {
+  max-width: 400px;
+  margin: 60px auto;
+  padding: 30px;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  text-align: center;
+}
+
+/* Heading */
+.container h1 {
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 20px;
+}
+.intro-text {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+  margin-bottom: 30px;
+}
+.help-text {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin-top: 10px;
+}
+.create-account {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+.container footer {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-top: 20px;
+}
+
+/* Form */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-align: left;
+}
+
+/* Labels */
+label {
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
+/* Inputs */
+input {
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: #fcfbf8;
+  color: var(--color-text);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+input::placeholder {
+  color: var(--color-text-muted);
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(95, 167, 180, 0.15);
+}
+
+/* Button */
+button {
+  padding: 12px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+
+button:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-soft);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Helper text */
+.form-help {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-top: 12px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .container {
+    margin: 20px;
+    padding: 20px;
+  }
+}

@@ -1,0 +1,140 @@
+/* ============================
+   MYVID Public Profile Theme
+   ============================ */
+
+/* Variables */
+:root {
+  --color-bg: #f6f4ef;            /* warm off-white background */
+  --color-surface: #ffffff;       /* card surface */
+  --color-primary: #5fa7b4;       /* soft teal */
+  --color-primary-hover: #4b93a0; /* deeper teal */
+  --color-accent: #a7a6d9;        /* lavender reassurance */
+  --color-text: #2f3a3c;          /* deep slate */
+  --color-text-muted: #5b6a6d;    /* muted text */
+  --color-border: #e3dfd6;        /* soft border */
+  --color-amber: #d9a85b;         /* muted amber for alerts */
+  --color-amber-bg: #f3e3c7;      /* soft amber background */
+  --color-success: #7fb28a;       /* muted green for call button */
+  --shadow-soft: 0 2px 8px rgba(34, 46, 49, 0.08);
+
+  --font-family: "Nunito", "Segoe UI", Arial, sans-serif;
+  --radius: 12px;
+  --transition: 180ms ease;
+}
+
+/* Global styles */
+body {
+  font-family: var(--font-family);
+  background: var(--color-bg);
+  color: var(--color-text);
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+/* Container */
+.container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 24px;
+  text-align: center;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+}
+
+/*for disabled html*/
+.container h2 {
+  color: var(--color-text-muted);
+  margin-bottom: 20px;
+}
+.container footer {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: 8px;
+  text-align: center;
+}
+.intro {
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+  color: var(--color-text-muted);
+}
+.support {
+  font-size: 0.9rem;
+  margin-top: 20px;
+  color: var(--color-text-muted);
+}
+
+/* Profile photo */
+#profile-photo {
+  max-width: 150px;
+  border-radius: 50%;
+  border: 3px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 16px;
+}
+
+/* Name & identity */
+.container h1 {
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 8px;
+}
+
+.container p {
+  color: var(--color-text-muted);
+  margin-bottom: 20px;
+}
+
+/* Medical alerts */
+#medical-alerts {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.alert {
+  background: var(--color-amber-bg);
+  color: var(--color-text);
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-amber);
+  font-weight: 600;
+  box-shadow: var(--shadow-soft);
+}
+
+/* Call button */
+.call-btn {
+  display: block;
+  margin: 20px auto;
+  padding: 12px 20px;
+  background: var(--color-success);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: var(--radius);
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+
+.call-btn:hover {
+  background: #6aa77a;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-soft);
+}
+
+/* Disclaimer */
+.disclaimer {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-top: 20px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .container {
+    margin: 20px;
+    padding: 16px;
+  }
+}

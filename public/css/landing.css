@@ -1,0 +1,100 @@
+/* ============================
+   MYVID Landing Page Theme
+   ============================ */
+
+/* Variables */
+:root {
+  --color-bg: #f6f4ef;            /* warm off-white background */
+  --color-surface: #ffffff;       /* card surface */
+  --color-primary: #5fa7b4;       /* soft teal */
+  --color-primary-hover: #4b93a0; /* deeper teal */
+  --color-accent: #a7a6d9;        /* lavender reassurance */
+  --color-text: #2f3a3c;          /* deep slate */
+  --color-text-muted: #5b6a6d;    /* muted text */
+  --color-border: #e3dfd6;        /* soft border */
+  --shadow-soft: 0 2px 8px rgba(34, 46, 49, 0.08);
+
+  --font-family: "Nunito", "Segoe UI", Arial, sans-serif;
+  --radius: 12px;
+  --transition: 180ms ease;
+}
+
+/* Global styles */
+body {
+  font-family: var(--font-family);
+  background: var(--color-bg);
+  color: var(--color-text);
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+/* Container */
+.container {
+  max-width: 600px;
+  margin: 60px auto;
+  padding: 30px;
+  text-align: center;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+}
+
+/* Headings */
+.container h1 {
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 16px;
+}
+
+.container h2 {
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: 12px;
+}
+
+.container p {
+  color: var(--color-text-muted);
+  margin-bottom: 24px;
+}
+
+.container footer {
+  font-size: 0.9em;
+  color: var(--color-text-muted);
+  margin-top: 40px;
+}
+
+/* Links styled as buttons */
+a {
+  display: block;
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: var(--radius);
+  background: var(--color-primary);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+
+a:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-soft);
+}
+
+/* Accent link */
+a.accent {
+  background: var(--color-accent);
+}
+a.accent:hover {
+  filter: brightness(0.95);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .container {
+    margin: 20px;
+    padding: 20px;
+  }
+}
