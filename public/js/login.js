@@ -1,4 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const notification = document.getElementById('notification');
+  const showNotification = (message, isServerError) => {
+    notification.textContent = `${message} ${isServerError ? '(Server-side issue - please try again later)' : '(Client-side issue - check your input)'}`;
+    notification.classList.add('error');
+    notification.style.display = 'block';
+    setTimeout(() => { notification.style.display = 'none'; }, 5000);
+  };
+
   document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value;
@@ -8,12 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     });
+    const data = await res.json();
     if (res.ok) {
-      const { token } = await res.json();
-      localStorage.setItem('token', token);
+      localStorage.setItem('token', data.token);
       window.location.href = '/dashboard';
     } else {
-      alert('Login failed');
+      showNotification(data.message || 'Login failed.', res.status >= 500);
     }
   });
 });

@@ -12,7 +12,13 @@ router.post('/signup', async (req, res) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ success: true, token });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    let message = 'Signup failed. Please try again.';
+    if (err.code === 11000) {
+      message = 'Email already in use.';
+    } else if (err.name === 'ValidationError') {
+      message = 'Invalid email or password.';
+    }
+    res.status(400).json({ success: false, message });
   }
 });
 
@@ -26,7 +32,7 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ success: true, token });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: 'Login failed. Please try again.' });
   }
 });
 

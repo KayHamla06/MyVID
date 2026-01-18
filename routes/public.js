@@ -22,13 +22,13 @@ router.get('/data/:qrId', async (req, res) => {
     if (!user || !user.qrEnabled) {
       return res.status(404).json({ success: false, message: 'QR disabled or not found' });
     }
-    const publicContact = user.emergencyContacts.find(c => c.isPublic);
+    const publicContact = user.emergencyContacts.filter(c => c.isPublic);
     const publicData = {
       firstName: user.firstName,
       profilePhoto: user.profilePhoto,
       country: user.country,
       medicalAlerts: user.medicalAlerts,
-      emergencyContact: publicContact ? { name: publicContact.name, phone: publicContact.phone } : null
+       emergencyContacts: publicContacts.map(c => ({ name: c.name, phone: c.phone }))
     };
     res.json({ success: true, data: publicData });
   } catch (err) {

@@ -13,12 +13,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       span.textContent = alert;
       alertsDiv.appendChild(span);
     });
-    const contactA = document.getElementById('emergency-contact');
-    if (data.emergencyContact) {
-      contactA.href = `tel:${data.emergencyContact.phone}`;
-      contactA.textContent = `Call ${data.emergencyContact.name}`;
+        const contactsDiv = document.getElementById('emergency-contacts');
+    if (data.emergencyContacts && data.emergencyContacts.length > 0) {
+      data.emergencyContacts.forEach(contact => {
+        const a = document.createElement('a');
+        a.href = `tel:${contact.phone}`;
+        a.className = 'call-btn';
+        a.textContent = `Call ${contact.name}`;
+        contactsDiv.appendChild(a);
+      });
     } else {
-      contactA.style.display = 'none';
+      contactsDiv.style.display = 'none';
     }
   } else {
     window.location.href = '/disabled.html'; // Fallback
