@@ -18,7 +18,7 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-module.exports = (upload) => {
+//module.exports = (upload) => {
   router.use(authMiddleware);
 
   router.get('/profile', async (req, res) => {
@@ -40,14 +40,14 @@ module.exports = (upload) => {
     }
   });
 
-  router.post('/upload-photo', upload.single('photo'), async (req, res) => {
+ /* router.post('/upload-photo', upload.single('photo'), async (req, res) => {
     try {
       const user = await User.findByIdAndUpdate(req.userId, { profilePhoto: `/uploads/${req.file.filename}` }, { new: true }).select('-password');
       res.json({ success: true, data: user });
     } catch (err) {
       res.status(500).json({ success: false, message: err.message });
     }
-  });
+  });*/
 
   router.post('/qr/generate', async (req, res) => {
     try {
@@ -89,5 +89,5 @@ module.exports = (upload) => {
     }
   });
 
-  return router;
-};
+  module.exports = router;
+//;

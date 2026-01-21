@@ -1,5 +1,5 @@
 /* ============================
-   MYVID Landing Page Theme
+   SafePass ID Landing Page Theme
    ============================ */
 
 /* Variables */
@@ -45,6 +45,14 @@ body {
   font-weight: 700;
   color: var(--color-primary);
   margin-bottom: 16px;
+}
+
+.container img.logo {
+  height: auto;
+  margin-bottom: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 75%;
 }
 
 .container h2 {

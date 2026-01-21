@@ -1,5 +1,5 @@
 /* ============================
-   Sign Up Page – MYVID Theme
+   Sign Up Page – SafePass ID Theme
    ============================ */
 
 /* Variables */
@@ -44,6 +44,13 @@ body {
   margin-bottom: 20px;
   font-weight: 700;
   color: var(--color-primary);
+}
+.container img.logo {
+  height: auto;
+  margin-bottom: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 75%;
 }
 
 /* Intro paragraph */
