@@ -8,11 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const suffix = isServerError 
-      ? '(Server-side issue – please try again later or contact support)'
-      : '(Client-side issue – please check your email/password)';
-
-    notification.textContent = `${message} ${suffix}`;
+    notification.textContent = message;
     notification.classList.add('error');
     notification.style.display = 'block';
 

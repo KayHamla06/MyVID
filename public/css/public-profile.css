@@ -1,140 +1,287 @@
-/* ============================
-   SafePass ID Public Profile Theme
-   ============================ */
+/* SafePass ID Public Profile - Emergency View */
 
-/* Variables */
 :root {
-  --color-bg: #f6f4ef;            /* warm off-white background */
-  --color-surface: #ffffff;       /* card surface */
-  --color-primary: #5fa7b4;       /* soft teal */
-  --color-primary-hover: #4b93a0; /* deeper teal */
-  --color-accent: #a7a6d9;        /* lavender reassurance */
-  --color-text: #2f3a3c;          /* deep slate */
-  --color-text-muted: #5b6a6d;    /* muted text */
-  --color-border: #e3dfd6;        /* soft border */
-  --color-amber: #d9a85b;         /* muted amber for alerts */
-  --color-amber-bg: #f3e3c7;      /* soft amber background */
-  --color-success: #7fb28a;       /* muted green for call button */
-  --shadow-soft: 0 2px 8px rgba(34, 46, 49, 0.08);
-
-  --font-family: "Nunito", "Segoe UI", Arial, sans-serif;
+  --color-primary: #5fa7b4;
+  --color-bg: #f8f9fa;
+  --color-surface: #ffffff;
+  --color-text: #2c3e50;
+  --color-text-light: #6c757d;
+  --color-border: #e0e0e0;
+  --color-alert: #ff9800;
+  --color-alert-bg: #fff3e0;
+  --color-success: #4caf50;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.1);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
   --radius: 12px;
-  --transition: 180ms ease;
 }
 
-/* Global styles */
-body {
-  font-family: var(--font-family);
-  background: var(--color-bg);
-  color: var(--color-text);
+* {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, rgba(95, 167, 180, 0.15), rgba(167, 166, 217, 0.15));
+  color: var(--color-text);
   line-height: 1.6;
+  min-height: 100vh;
+  padding: 2rem 1rem;
 }
 
 /* Container */
 .container {
-  max-width: 600px;
-  margin: 40px auto;
-  padding: 24px;
-  text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
   background: var(--color-surface);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
 }
 
-/*for disabled html*/
-.container h2 {
-  color: var(--color-text-muted);
-  margin-bottom: 20px;
-}
-.container footer {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-  margin-top: 8px;
+/* Profile Header */
+.profile-header {
+  padding: 2.5rem 2rem;
   text-align: center;
-}
-.intro {
-  font-size: 1.1rem;
-  margin-bottom: 20px;
-  color: var(--color-text-muted);
-}
-.support {
-  font-size: 0.9rem;
-  margin-top: 20px;
-  color: var(--color-text-muted);
+  background: linear-gradient(135deg, var(--color-primary), #4b93a0);
+  color: white;
 }
 
-/* Profile photo */
+.emergency-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
 #profile-photo {
-  max-width: 150px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
-  border: 3px solid var(--color-border);
-  box-shadow: var(--shadow-soft);
-  margin-bottom: 16px;
+  object-fit: cover;
+  border: 4px solid white;
+  box-shadow: var(--shadow-md);
+  margin: 1rem auto;
+  display: block;
 }
 
-/* Name & identity */
-.container h1 {
+h1 {
+  font-size: 2rem;
   font-weight: 700;
-  color: var(--color-primary);
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
 }
 
-.container p {
-  color: var(--color-text-muted);
-  margin-bottom: 20px;
+#country {
+  font-size: 1rem;
+  opacity: 0.95;
+  margin: 0;
 }
 
-/* Medical alerts */
+/* Content Section */
+.profile-content {
+  padding: 2rem;
+}
+
+/* Section */
+.profile-section {
+  margin-bottom: 2rem;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.section-icon {
+  font-size: 1.5rem;
+}
+
+h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* Medical Alerts */
 #medical-alerts {
   display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 20px;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .alert {
-  background: var(--color-amber-bg);
-  color: var(--color-text);
-  padding: 8px 14px;
+  background: var(--color-alert-bg);
+  border-left: 4px solid var(--color-alert);
+  padding: 1rem;
   border-radius: var(--radius);
-  border: 1px solid var(--color-amber);
   font-weight: 600;
-  box-shadow: var(--shadow-soft);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-/* Call button */
+.alert-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+/* Emergency Contact */
+.contact-card {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.contact-info {
+  margin-bottom: 1rem;
+}
+
+.contact-label {
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+  margin-bottom: 0.25rem;
+}
+
+.contact-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
 .call-btn {
   display: block;
-  margin: 20px auto;
-  padding: 12px 20px;
+  width: 100%;
+  padding: 1rem;
   background: var(--color-success);
-  color: #fff;
+  color: white;
   text-decoration: none;
-  font-weight: 600;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.1rem;
   border-radius: var(--radius);
-  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .call-btn:hover {
-  background: #6aa77a;
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-soft);
+  background: #43a047;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.call-btn::before {
+  content: '📞 ';
+  font-size: 1.25rem;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-light);
+  font-style: italic;
 }
 
 /* Disclaimer */
 .disclaimer {
+  background: #f8f9fa;
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+  border-left: 3px solid var(--color-primary);
+  margin-top: 2rem;
+}
+
+/* Footer */
+footer {
+  background: #f8f9fa;
+  padding: 1.5rem 2rem;
+  text-align: center;
+  color: var(--color-text-light);
   font-size: 0.85rem;
-  color: var(--color-text-muted);
-  margin-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+.footer-note {
+  margin-top: 0.5rem;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Error/Disabled States */
+.error-container {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.error-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.error-container h1 {
+  color: var(--color-alert);
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+.error-container h2 {
+  color: var(--color-text-light);
+  font-size: 1.25rem;
+  font-weight: 400;
+  margin-bottom: 1.5rem;
+}
+
+.intro {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--color-text);
+  margin-bottom: 1.5rem;
+}
+
+.support {
+  font-size: 0.9rem;
+  color: var(--color-text-light);
 }
 
 /* Responsive */
 @media (max-width: 600px) {
-  .container {
-    margin: 20px;
-    padding: 16px;
+  body {
+    padding: 1rem 0.5rem;
+  }
+
+  .profile-header {
+    padding: 2rem 1.5rem;
+  }
+
+  .profile-content {
+    padding: 1.5rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.1rem;
   }
 }
