@@ -1,22 +1,26 @@
 {
-  "name": "emergency-qr-system",
+  "name": "safepass-id",
   "version": "1.0.0",
+  "description": "Emergency Identity Platform",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "dotenv": "^16.6.1",
-    "express": "^4.17.2",
-    "jsonwebtoken": "^9.0.2",
-    "mongodb": "^7.0.0",
-    "mongoose": "^8.0.0",
-    "multer": "^1.4.4",
-    "qrcode": "^1.5.4",
-    "uuid": "^9.0.1"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": "18.x"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.6.3",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "qrcode": "^1.5.3",
+    "uuid": "^9.0.1",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
