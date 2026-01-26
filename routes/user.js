@@ -1,46 +1,11 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 const User = require('../models/User');
 const qrGenerator = require('../utils/qrGenerator');
+const { cloudinary, upload } = require('../config/cloudinary');
 
 const router = express.Router();
-
-// Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
-    cb(null, uniqueName);
-  }
-});
-
-const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-    
-    if (extname && mimetype) {
-      return cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed!'));
-    }
-  }
-});
 
 // Auth middleware
 const authMiddleware = (req, res, next) => {
@@ -78,7 +43,7 @@ router.get('/profile', async (req, res) => {
 router.put('/profile', async (req, res) => {
   const updates = req.body;
   try {
-    // Remove password from updates if present
+    // Remove sensitive fields from updates
     delete updates.password;
     delete updates.email;
     
@@ -99,28 +64,83 @@ router.put('/profile', async (req, res) => {
   }
 });
 
-// Upload profile photo
+// Upload profile photo to Cloudinary
 router.post('/upload-photo', upload.single('photo'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
     
-    const photoUrl = `/uploads/${req.file.filename}`;
+    // Get the user to delete old photo if exists
+    const user = await User.findById(req.userId);
     
-    const user = await User.findByIdAndUpdate(
+    // Delete old photo from Cloudinary if it exists
+    if (user.profilePhoto && user.cloudinaryPublicId) {
+      try {
+        await cloudinary.uploader.destroy(user.cloudinaryPublicId);
+      } catch (err) {
+        console.error('Error deleting old photo:', err);
+        // Continue anyway
+      }
+    }
+    
+    // Cloudinary URL is in req.file.path
+    const photoUrl = req.file.path;
+    const publicId = req.file.filename;
+    
+    // Update user with new photo
+    const updatedUser = await User.findByIdAndUpdate(
       req.userId, 
-      { profilePhoto: photoUrl, updatedAt: Date.now() }, 
+      { 
+        profilePhoto: photoUrl,
+        cloudinaryPublicId: publicId,
+        updatedAt: Date.now() 
+      }, 
       { new: true }
     ).select('-password');
+    
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    res.json({ 
+      success: true, 
+      data: updatedUser, 
+      photoUrl: photoUrl 
+    });
+  } catch (err) {
+    console.error('Upload photo error:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Delete profile photo
+router.delete('/delete-photo', async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
     
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
     
-    res.json({ success: true, data: user, photoUrl });
+    // Delete from Cloudinary if exists
+    if (user.cloudinaryPublicId) {
+      try {
+        await cloudinary.uploader.destroy(user.cloudinaryPublicId);
+      } catch (err) {
+        console.error('Error deleting photo from Cloudinary:', err);
+      }
+    }
+    
+    // Update user
+    user.profilePhoto = null;
+    user.cloudinaryPublicId = null;
+    user.updatedAt = Date.now();
+    await user.save();
+    
+    res.json({ success: true, message: 'Photo deleted successfully' });
   } catch (err) {
-    console.error('Upload photo error:', err);
+    console.error('Delete photo error:', err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
@@ -142,7 +162,7 @@ router.post('/qr/generate', async (req, res) => {
     // Generate the public URL
     const url = `${req.protocol}://${req.get('host')}/p/${user.qrId}`;
     
-    // Generate QR code as data URL (always PNG for display)
+    // Generate QR code as data URL
     const qrDataUrl = await qrGenerator.generateQR(url);
     
     res.json({ 
