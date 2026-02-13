@@ -1,77 +1,263 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const validator = require('validator');
 
-const userSchema = new mongoose.Schema({
-  email: { 
-    type: String, 
-    required: true, 
+const UserSchema = new mongoose.Schema({
+  // Authentication
+  email: {
+    type: String,
+    required: [true, 'Email is required'],
     unique: true,
     lowercase: true,
-    trim: true
+    trim: true,
+    validate: [validator.isEmail, 'Please provide a valid email']
   },
-  password: { 
-    type: String, 
-    required: true 
+  password: {
+    type: String,
+    required: [true, 'Password is required'],
+    minlength: [6, 'Password must be at least 6 characters'],
+    select: false // Don't return password by default
   },
-  firstName: { 
-    type: String 
+
+  // Security features
+  loginAttempts: {
+    type: Number,
+    default: 0
   },
-  profilePhoto: { 
-    type: String 
+  lockUntil: {
+    type: Date
   },
-  cloudinaryPublicId: {
-    type: String // Store Cloudinary public_id for deletion
+  passwordResetToken: String,
+  passwordResetExpires: Date,
+
+  // Basic Profile Information
+  firstName: {
+    type: String,
+    trim: true,
+    maxlength: [50, 'First name cannot exceed 50 characters']
   },
-  country: { 
-    type: String 
+  country: {
+    type: String,
+    trim: true,
+    maxlength: [100, 'Country cannot exceed 100 characters']
   },
-  emergencyContacts: [{
-    name: String,
-    phone: String,
-    isPublic: { type: Boolean, default: false }
-  }],
-  medicalAlerts: [{ 
-    type: String 
-  }],
-  medicalNotes: { 
-    type: String 
+  profilePhoto: {
+    type: String, // Cloudinary URL
+    default: null
   },
+
+  // Full Details (Private - for password recovery)
   fullDetails: {
-    lastName: String,
-    address: String,
-    dob: Date
+    lastName: {
+      type: String,
+      trim: true,
+      maxlength: [50, 'Last name cannot exceed 50 characters']
+    },
+    address: {
+      type: String,
+      trim: true,
+      maxlength: [200, 'Address cannot exceed 200 characters']
+    },
+    dob: {
+      type: Date
+    }
   },
-  qrId: { 
-    type: String, 
+
+  // Emergency Contacts
+  emergencyContacts: [{
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: [100, 'Contact name cannot exceed 100 characters']
+    },
+    phone: {
+      type: String,
+      required: true,
+      trim: true,
+      validate: {
+        validator: function (v) {
+          return /^[\d\s\-\+\(\)]+$/.test(v);
+        },
+        message: 'Please provide a valid phone number'
+      }
+    },
+    isPublic: {
+      type: Boolean,
+      default: false
+    }
+  }],
+
+  // Medical Information
+  medicalAlerts: [{
+    type: String,
+    trim: true,
+    maxlength: [200, 'Medical alert cannot exceed 200 characters']
+  }],
+  medicalNotes: {
+    type: String,
+    trim: true,
+    maxlength: [1000, 'Medical notes cannot exceed 1000 characters']
+  },
+
+  // QR Code Configuration
+  qrId: {
+    type: String,
     unique: true,
-    sparse: true // Allows null values while maintaining uniqueness
+    sparse: true // Allows multiple null values
   },
-  qrEnabled: { 
-    type: Boolean, 
-    default: true 
+  qrEnabled: {
+    type: Boolean,
+    default: false
   },
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
+  qrAccessLogs: [{
+    timestamp: {
+      type: Date,
+      default: Date.now
+    },
+    ipAddress: String,
+    userAgent: String,
+    location: String
+  }],
+
+  // Account status
+  isActive: {
+    type: Boolean,
+    default: true
   },
-  updatedAt: { 
-    type: Date, 
-    default: Date.now 
+  accountStatus: {
+    type: String,
+    enum: ['active', 'locked', 'suspended'],
+    default: 'active'
+  },
+
+  // Timestamps
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  lastLogin: {
+    type: Date
   }
+}, {
+  timestamps: true
 });
 
-// Hash password before saving
-userSchema.pre('save', async function(next) {
-  if (this.isModified('password')) {
-    this.password = await bcrypt.hash(this.password, 10);
+// Virtual for account locked status
+UserSchema.virtual('isLocked').get(function () {
+  return !!(this.lockUntil && this.lockUntil > Date.now());
+});
+
+// Indexes for performance (email and qrId already indexed via unique: true)
+UserSchema.index({ createdAt: -1 });
+
+// Pre-save middleware to hash password
+UserSchema.pre('save', async function (next) {
+  // Only hash password if it's modified
+  if (!this.isModified('password')) {
+    return next();
   }
-  this.updatedAt = Date.now();
-  next();
+
+  try {
+    const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_ROUNDS) || 12);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 // Method to compare passwords
-userSchema.methods.comparePassword = async function(password) {
-  return bcrypt.compare(password, this.password);
+UserSchema.methods.comparePassword = async function (candidatePassword) {
+  try {
+    return await bcrypt.compare(candidatePassword, this.password);
+  } catch {
+    throw new Error('Password comparison failed');
+  }
 };
 
-module.exports = mongoose.model('User', userSchema);
+// Method to increment login attempts
+UserSchema.methods.incLoginAttempts = function () {
+  // If we have a previous lock that has expired, restart at 1
+  if (this.lockUntil && this.lockUntil < Date.now()) {
+    return this.updateOne({
+      $set: { loginAttempts: 1 },
+      $unset: { lockUntil: 1 }
+    });
+  }
+
+  // Otherwise, increment attempts
+  const updates = { $inc: { loginAttempts: 1 } };
+
+  // Lock account after max attempts
+  const maxAttempts = parseInt(process.env.MAX_LOGIN_ATTEMPTS) || 5;
+  const lockTime = parseInt(process.env.LOCKOUT_TIME) || 900000; // 15 minutes
+
+  if (this.loginAttempts + 1 >= maxAttempts && !this.isLocked) {
+    updates.$set = { lockUntil: Date.now() + lockTime };
+  }
+
+  return this.updateOne(updates);
+};
+
+// Method to reset login attempts
+UserSchema.methods.resetLoginAttempts = function () {
+  return this.updateOne({
+    $set: { loginAttempts: 0 },
+    $unset: { lockUntil: 1 }
+  });
+};
+
+// Method to get safe user data (no sensitive info)
+UserSchema.methods.getSafeProfile = function () {
+  return {
+    id: this._id,
+    email: this.email,
+    firstName: this.firstName,
+    country: this.country,
+    profilePhoto: this.profilePhoto,
+    emergencyContacts: this.emergencyContacts,
+    medicalAlerts: this.medicalAlerts,
+    medicalNotes: this.medicalNotes,
+    fullDetails: this.fullDetails,
+    qrId: this.qrId,
+    qrEnabled: this.qrEnabled,
+    createdAt: this.createdAt,
+    lastLogin: this.lastLogin
+  };
+};
+
+// Method to get public profile data (for QR code access)
+UserSchema.methods.getPublicProfile = function () {
+  const publicContacts = this.emergencyContacts.filter(c => c.isPublic);
+
+  return {
+    firstName: this.firstName,
+    country: this.country,
+    profilePhoto: this.profilePhoto,
+    medicalAlerts: this.medicalAlerts,
+    emergencyContacts: publicContacts.map(c => ({
+      name: c.name,
+      phone: c.phone
+    }))
+  };
+};
+
+// Method to log QR access
+UserSchema.methods.logQRAccess = async function (accessData) {
+  this.qrAccessLogs.push({
+    timestamp: new Date(),
+    ipAddress: accessData.ipAddress,
+    userAgent: accessData.userAgent,
+    location: accessData.location || 'Unknown'
+  });
+
+  // Keep only last 100 logs
+  if (this.qrAccessLogs.length > 100) {
+    this.qrAccessLogs = this.qrAccessLogs.slice(-100);
+  }
+
+  await this.save();
+};
+
+module.exports = mongoose.model('User', UserSchema);

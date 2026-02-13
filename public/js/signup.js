@@ -1,5 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
   const notification = document.getElementById('notification');
+  let recaptchaToken = null;
+
+  // reCAPTCHA callback
+  window.onRecaptchaSuccess = (token) => {
+    recaptchaToken = token;
+    console.log('✅ reCAPTCHA verified successfully');
+  };
   
   const showNotification = (message, isServerError) => {
     if (!notification) {
@@ -10,10 +17,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     notification.textContent = message;
     notification.classList.add('error');
-    notification.style.display = 'block';
+    notification.classList.remove('notification-hidden');
     
     setTimeout(() => { 
-      notification.style.display = 'none'; 
+      notification.classList.add('notification-hidden');
       notification.classList.remove('error');
     }, 5000);
   };
@@ -23,6 +30,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (!document.getElementById('consent').checked) {
       showNotification('Consent required.', false);
+      return;
+    }
+
+    if (!recaptchaToken) {
+      showNotification('Please verify reCAPTCHA.', false);
       return;
     }
     
@@ -46,7 +58,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ 
+          email, 
+          password,
+          recaptchaToken
+        })
       });
       
       console.log('Response status:', res.status);
@@ -59,10 +75,15 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = '/dashboard';
       } else {
         showNotification(data.message || 'Signup failed.', res.status >= 500);
+        // Reset reCAPTCHA
+        grecaptcha.reset();
+        recaptchaToken = null;
       }
     } catch (err) {
       console.error('Signup fetch error:', err);
       showNotification('Network error – check your internet connection.', true);
+      grecaptcha.reset();
+      recaptchaToken = null;
     }
   });
 });

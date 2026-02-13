@@ -181,6 +181,18 @@ input:focus {
   user-select: none;
 }
 
+/* reCAPTCHA Container */
+.recaptcha-container {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.g-recaptcha {
+  transform: scale(0.95);
+  transform-origin: center;
+}
+
 /* Submit Button */
 .btn-submit {
   width: 100%;
@@ -280,4 +292,9 @@ input:focus {
   h1 {
     font-size: 1.5rem;
   }
+}
+
+/* Utility Classes */
+.notification-hidden {
+  display: none;
 }

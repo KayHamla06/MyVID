@@ -574,3 +574,12 @@ button {
     flex-direction: column;
   }
 }
+
+/* Utility Classes */
+.qr-hidden {
+  display: none;
+}
+
+.btn-hidden {
+  display: none;
+}

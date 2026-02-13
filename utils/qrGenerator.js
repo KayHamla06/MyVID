@@ -1,49 +1,58 @@
 const QRCode = require('qrcode');
 
-// Generate QR code as data URL for display
-exports.generateQR = async (url, format = 'png') => {
+/**
+ * Generate QR code as data URL for display
+ * @param {string} url - URL to encode in QR code
+ * @returns {Promise<string>} - Base64 data URL
+ */
+exports.generateQR = async (url) => {
   try {
-    // Always use toDataURL for display (returns base64 data URL)
     const dataUrl = await QRCode.toDataURL(url, {
       width: 300,
       margin: 2,
       color: {
         dark: '#000000',
         light: '#FFFFFF'
-      }
+      },
+      errorCorrectionLevel: 'H' // High error correction for better scanning
     });
     return dataUrl;
   } catch (err) {
     console.error('QR generation error:', err);
-    throw err;
+    throw new Error('Failed to generate QR code');
   }
 };
 
-// Generate QR code as buffer for download
+/**
+ * Generate QR code as buffer for download
+ * @param {string} url - URL to encode in QR code
+ * @param {string} format - 'svg' or 'png'
+ * @returns {Promise<Buffer>} - File buffer
+ */
 exports.generateQRBuffer = async (url, format = 'png') => {
   try {
     if (format === 'svg') {
-      // For SVG, use toString
       const svgString = await QRCode.toString(url, {
         type: 'svg',
         width: 300,
-        margin: 2
+        margin: 2,
+        errorCorrectionLevel: 'H'
       });
       return Buffer.from(svgString);
     } else {
-      // For PNG, use toBuffer
       const buffer = await QRCode.toBuffer(url, {
         width: 300,
         margin: 2,
         color: {
           dark: '#000000',
           light: '#FFFFFF'
-        }
+        },
+        errorCorrectionLevel: 'H'
       });
       return buffer;
     }
   } catch (err) {
     console.error('QR buffer generation error:', err);
-    throw err;
+    throw new Error('Failed to generate QR code buffer');
   }
 };
