@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const cloudinary = require('../config/cloudinary');
+const { cloudinary } = require('../config/cloudinary');
 const multer = require('multer');
 
 // Configure multer for memory storage
