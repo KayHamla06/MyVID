@@ -11,7 +11,10 @@ const {
 } = require('../controllers/authController');
 const { validateRecaptcha } = require('../middleware/auth');
 const { authLimiter, passwordResetLimiter } = require('../middleware/Ratelimiter');
+const { validateInput, sanitizeInput } = require('../security/validator');
+const { passwordResetRateLimiter } = require('../security/rateLimiter');
 
+// Routes (validation/sanitization applied per-route below)
 /**
  * @route   POST /api/auth/signup
  * @desc    Register new user with password confirmation and reCAPTCHA

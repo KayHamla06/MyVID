@@ -1,31 +1,56 @@
 const mongoose = require('mongoose');
+const config = require('./environment');
+
+// Cache mongoose connection in global to prevent multiple connections
+const globalAny = global;
+if (!globalAny._mongoose) globalAny._mongoose = { conn: null, promise: null };
 
 const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
+  if (globalAny._mongoose.conn) return globalAny._mongoose.conn;
 
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+  if (!globalAny._mongoose.promise) {
+    globalAny._mongoose.promise = mongoose
+      .connect(config.mongodb.uri, config.mongodb.options)
+      .then((m) => m.connection);
+  }
 
-    // Handle connection events
-    mongoose.connection.on('error', (err) => {
-      console.error(`❌ MongoDB connection error: ${err}`);
-    });
+  globalAny._mongoose.conn = await globalAny._mongoose.promise;
 
-    mongoose.connection.on('disconnected', () => {
-      console.warn('⚠️  MongoDB disconnected');
-    });
+  mongoose.connection.on('error', (err) => {
+    console.error(`❌ MongoDB connection error: ${err}`);
+  });
 
-    // Graceful shutdown
-    process.on('SIGINT', async () => {
-      await mongoose.connection.close();
-      console.log('MongoDB connection closed due to app termination');
-      process.exit(0);
-    });
+  mongoose.connection.on('disconnected', () => {
+    console.warn('⚠️  MongoDB disconnected');
+  });
 
-  } catch (error) {
-    console.error(`❌ MongoDB connection failed: ${error.message}`);
-    process.exit(1);
+  return globalAny._mongoose.conn;
+};
+
+const disconnectDB = async () => {
+  if (globalAny._mongoose.conn) {
+    await mongoose.connection.close();
+    globalAny._mongoose.conn = null;
+    globalAny._mongoose.promise = null;
   }
 };
 
-module.exports = connectDB;
+const clearDatabase = async () => {
+  if (!config.isTest) throw new Error('clearDatabase may only be used in test environment');
+  const collections = mongoose.connection.collections;
+  const promises = [];
+  for (const key in collections) promises.push(collections[key].deleteMany({}));
+  await Promise.all(promises);
+};
+
+const getConnectionStatus = () => {
+  const state = mongoose.connection.readyState;
+  return { isConnected: state === 1, readyState: state, dbName: mongoose.connection.name };
+};
+
+const healthCheck = async () => {
+  const status = getConnectionStatus();
+  return status.isConnected ? { healthy: true, message: 'Connected', database: status.dbName } : { healthy: false, message: 'Not connected' };
+};
+
+module.exports = { connectDB, disconnectDB, clearDatabase, getConnectionStatus, healthCheck };

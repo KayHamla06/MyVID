@@ -1,4 +1,8 @@
 const QRCode = require('qrcode');
+const config = require('../config/environment');
+
+// Helper to build public profile URL for a given QR id
+exports.buildPublicUrl = (qrId) => `${config.baseURL.replace(/\/$/, '')}/p/${qrId}`;
 
 /**
  * Generate QR code as data URL for display

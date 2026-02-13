@@ -4,7 +4,11 @@
  */
 
 // API Base URL
-const API_BASE = window.location.origin;
+// Before:
+//const API_BASE = window.location.origin;
+
+// After:
+const API_BASE = window.location.origin; // Still use window.location for frontend
 
 /**
  * BUTTON LOADING STATE MANAGER

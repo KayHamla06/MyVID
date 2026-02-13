@@ -47,4 +47,9 @@
   "engines": {
     "node": "18.x"
   }
+  ,"jest": {
+    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"],
+    "testEnvironment": "node",
+    "testTimeout": 30000
+  }
 }

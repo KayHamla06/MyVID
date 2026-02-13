@@ -1,20 +1,23 @@
-require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
+const config = require('./config/environment');
 const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
-const connectDB = require('./config/Database');
+const { connectDB } = require('./config/database');
 const { errorHandler, notFound } = require('./middleware/Errorhandler');
 const { apiLimiter } = require('./middleware/Ratelimiter');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = config.port || 3001;
 
-// Connect to database
-connectDB();
+// Connect to database (serverless-safe cache inside module)
+connectDB().catch(err => {
+  console.error('Database connection failed:', err.message);
+  // In CLI/dev allow process to exit
+  if (config.isProduction) process.exit(1);
+});
 
 // Security middleware
 app.use(helmet({
@@ -35,9 +38,13 @@ app.use(helmet({
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? process.env.SERVER_URL
-    : ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: (origin, cb) => {
+    // allow non-browser tools
+    if (!origin) return cb(null, true);
+    if (config.isProduction) return cb(null, config.baseURL);
+    const allowed = [config.baseURL, 'http://localhost:3000', 'http://127.0.0.1:3000'];
+    cb(null, allowed.includes(origin));
+  },
   credentials: true
 }));
 
@@ -95,30 +102,29 @@ app.use(notFound);
 // Error handler
 app.use(errorHandler);
 
-// Start server
-const server = app.listen(PORT, () => {
-  console.log(`
-╔═══════════════════════════════════════╗
-║   SafePass ID Server Running          ║
-║   Port: ${PORT}                       ║
-║   Environment: ${process.env.NODE_ENV || 'development'}          ║
-║   URL: http://localhost:${PORT}        ║
-╚═══════════════════════════════════════╝
-  `);
-});
+// Start server only when executed directly (keeps module safe for serverless imports)
+let server;
+if (require.main === module) {
+  server = app.listen(PORT, () => {
+    console.log(`SafePass ID Server Running - Port: ${PORT} - Env: ${config.env}`);
+    console.log(`Base URL: ${config.baseURL}`);
+  });
+}
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err, _promise) => {
-  console.log(`❌ Unhandled Rejection: ${err.message}`);
-  server.close(() => process.exit(1));
+  console.log(`❌ Unhandled Rejection: ${err && err.message}`);
+  if (server && server.close) server.close(() => process.exit(1));
 });
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('👋 SIGTERM received, shutting down gracefully');
-  server.close(() => {
-    console.log('💤 Process terminated');
-  });
+  if (server && server.close) {
+    server.close(() => {
+      console.log('💤 Process terminated');
+    });
+  }
 });
 
 module.exports = app;

@@ -4,6 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 const User = require('../models/User');
 const qrGenerator = require('../utils/qrGenerator');
 const { cloudinary, upload } = require('../config/cloudinary');
+const { uploadRateLimiter } = require('../security/rateLimiter');
 
 const router = express.Router();
 const { protect } = require('../middleware/auth');
@@ -13,6 +14,7 @@ const {
   getQRAccessLogs,
   deleteAccount
 } = require('../controllers/Usercontroller');
+const userController = require('../controllers/Uploadcontroller');
 const {
   generateQR,
   toggleQR,
@@ -49,9 +51,8 @@ router.post(
   '/upload-photo',
   protect,
   uploadLimiter,
-  uploadMiddleware,
-  handleUploadError,
-  uploadPhoto
+  upload.single('photo'),
+  userController.uploadPhoto
 );
 // Auth middleware
 const authMiddleware = (req, res, next) => {
