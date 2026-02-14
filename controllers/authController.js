@@ -21,6 +21,9 @@ const generateToken = (userId) => {
 // Verify Google reCAPTCHA v3
 const verifyRecaptcha = async (token) => {
   try {
+    // Only verify in production
+    if (process.env.NODE_ENV !== 'production') return true;
+
     const response = await axios.post(
       'https://www.google.com/recaptcha/api/siteverify',
       null,
@@ -39,7 +42,7 @@ const verifyRecaptcha = async (token) => {
     console.error('reCAPTCHA verification error:', error);
     // In production, you might want to fail closed (return false)
     // For development, you might want to fail open
-    return process.env.NODE_ENV === 'development';
+    return process.env.NODE_ENV !== 'production';
   }
 };
 

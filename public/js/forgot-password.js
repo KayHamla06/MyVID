@@ -2,6 +2,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const notification = document.getElementById('notification');
   let recaptchaToken = null;
   let userEmail = '';
+  const isProd = !['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.hostname !== '';
+
+  // Dynamically load reCAPTCHA only in production to avoid blocking dev/tests
+  if (isProd) {
+    const script = document.createElement('script');
+    script.src = 'https://www.google.com/recaptcha/api.js';
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    // Hide recaptcha placeholder in non-production
+    const placeholder = document.getElementById('recaptcha-placeholder');
+    if (placeholder) placeholder.style.display = 'none';
+  }
 
   // reCAPTCHA callback
   window.onRecaptchaSuccess = (token) => {
@@ -41,7 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('forgot-password-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    if (!recaptchaToken) {
+    // Require reCAPTCHA token only in production
+    if (isProd && !recaptchaToken) {
       showNotification('Please verify reCAPTCHA.', true);
       return;
     }

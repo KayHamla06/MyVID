@@ -6,9 +6,8 @@ const axios = require('axios');
 exports.validateRecaptcha = async (req, res, next) => {
   const { recaptchaToken } = req.body;
 
-  // Skip in development if no secret key
-  if (process.env.NODE_ENV !== 'production' && !process.env.RECAPTCHA_SECRET_KEY) {
-    console.warn('⚠️  reCAPTCHA validation skipped in development');
+  // Only enforce reCAPTCHA in production
+  if (process.env.NODE_ENV !== 'production') {
     return next();
   }
 

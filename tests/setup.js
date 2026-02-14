@@ -4,6 +4,21 @@
  */
 
 const { connectDB, disconnectDB, clearDatabase } = require('../config/database');
+let mongod;
+// If running tests, prefer an in-memory MongoDB to avoid external dependencies
+if (process.env.NODE_ENV === 'test') {
+  try {
+    const { MongoMemoryServer } = require('mongodb-memory-server');
+    // Defer creation until beforeAll to avoid async at module load
+    global.createInMemoryMongoServer = async () => {
+      mongod = await MongoMemoryServer.create();
+      process.env.MONGO_URI = mongod.getUri();
+    };
+  } catch (err) {
+    // If mongodb-memory-server isn't installed, tests will try to use MONGO_URI
+    console.warn('mongodb-memory-server not available, using MONGO_URI if set');
+  }
+}
 
 // Set test environment
 process.env.NODE_ENV = 'test';
@@ -15,7 +30,8 @@ jest.setTimeout(30000);
 beforeAll(async () => {
   console.log('🧪 Setting up test environment...');
   
-  // Connect to test database
+  // Start in-memory mongo (if available) and connect to test database
+  if (global.createInMemoryMongoServer) await global.createInMemoryMongoServer();
   await connectDB();
   
   console.log('✅ Test environment ready');
@@ -30,6 +46,7 @@ afterAll(async () => {
   
   // Disconnect from database
   await disconnectDB();
+  if (mongod) await mongod.stop();
   
   console.log('✅ Test environment cleaned up');
 });
@@ -94,12 +111,12 @@ global.mockCloudinaryUpload = () => {
  * Helper: Mock reCAPTCHA verification
  */
 global.mockRecaptcha = (shouldPass = true) => {
-  jest.mock('axios', () => ({
-    post: jest.fn().mockResolvedValue({
-      data: {
-        success: shouldPass,
-        score: shouldPass ? 0.9 : 0.3
-      }
-    })
-  }));
+  // Use spyOn to avoid referencing out-of-scope vars inside jest.mock factory
+  const axios = require('axios');
+  if (axios && axios.post && jest.isMockFunction(axios.post)) {
+    axios.post.mockResolvedValue({ data: { success: shouldPass, score: shouldPass ? 0.9 : 0.3 } });
+  } else {
+    // If axios.post is not yet mocked, spy on it
+    jest.spyOn(axios, 'post').mockResolvedValue({ data: { success: shouldPass, score: shouldPass ? 0.9 : 0.3 } });
+  }
 };

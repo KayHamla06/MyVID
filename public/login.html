@@ -6,7 +6,6 @@
   <title>Login – SafePass ID</title>
   <link rel="stylesheet" href="css/reset.css">
   <link rel="stylesheet" href="css/login.css">
-  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
   <div class="auth-container">
@@ -40,9 +39,9 @@
             autocomplete="current-password">
         </div>
 
-        <!-- reCAPTCHA Widget -->
+        <!-- reCAPTCHA Widget (loaded dynamically in production only) -->
         <div class="recaptcha-container">
-          <div class="g-recaptcha" data-sitekey="6Lfhv2gsAAAAABru1o_M73gIsf1btNyWb2DmN96S" data-callback="onRecaptchaSuccess"></div>
+          <div id="recaptcha-placeholder" class="g-recaptcha" data-sitekey="6Lfhv2gsAAAAABru1o_M73gIsf1btNyWb2DmN96S" data-callback="onRecaptchaSuccess"></div>
         </div>
 
         <button type="submit" class="btn-submit">Access SafePass ID</button>
