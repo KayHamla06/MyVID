@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/package.json",
   "name": "safepass-id",
   "version": "2.0.0",
   "description": "SafePass ID - Emergency Identity Platform",

@@ -89,10 +89,6 @@ app.get('/forgot-password', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'forgot-password.html'));
 });
 
-app.get('/p/:qrId', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'public-profile.html'));
-});
-
 app.get('/disabled', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'disabled.html'));
 });

@@ -3,7 +3,6 @@
  * Centralized environment variable management with validation
  */
 
-const path = require('path');
 const dotenv = require('dotenv');
 
 // Load environment variables
@@ -41,35 +40,34 @@ if (missingVars.length > 0) {
  */
 const getMongoURI = () => {
   const baseURI = process.env.MONGO_URI;
-  
+
   if (!baseURI) {
     throw new Error('MONGO_URI environment variable is required');
   }
 
-  // Extract connection string parts
-  const uriParts = baseURI.split('/');
-  const dbNameIndex = uriParts.length - 1;
-  
   // Determine database name based on environment
   let dbName;
   switch (NODE_ENV) {
-    case 'test':
-      dbName = process.env.MONGO_TEST_DB || 'SafePassID_Test';
-      break;
-    case 'development':
-      dbName = process.env.MONGO_DEV_DB || 'SafePassID_Dev';
-      break;
-    case 'production':
-      dbName = process.env.MONGO_PROD_DB || 'SafePassID';
-      break;
-    default:
-      dbName = 'SafePassID_Dev';
+  case 'test':
+    dbName = process.env.MONGO_TEST_DB || 'SafePassID_Test';
+    break;
+  case 'development':
+    dbName = process.env.MONGO_DEV_DB || 'SafePassID_Dev';
+    break;
+  case 'production':
+    dbName = process.env.MONGO_PROD_DB || 'SafePassID';
+    break;
+  default:
+    dbName = 'SafePassID_Dev';
   }
 
-  // Replace database name in URI
-  uriParts[dbNameIndex] = dbName;
-  
-  return uriParts.join('/');
+  // Construct URI: remove trailing slash and append database name
+  const cleanURI = baseURI.endsWith('/') ? baseURI.slice(0, -1) : baseURI;
+  const finalURI = `${cleanURI}/${dbName}`;
+
+  console.log(`🗄️  MongoDB URI constructed: ${finalURI}`);
+
+  return finalURI;
 };
 
 /**
@@ -81,7 +79,7 @@ const getBaseURL = () => {
   if (NODE_ENV === 'production') {
     return process.env.APP_URL || process.env.VERCEL_URL || 'https://my-kn7w5l5a1-kayhamla06s-projects.vercel.app';
   }
-  
+
   // Development/Test: use localhost
   const port = process.env.PORT || 3000;
   return process.env.BASE_URL || `http://localhost:${port}`;
@@ -96,11 +94,11 @@ const config = {
   isDevelopment: NODE_ENV === 'development',
   isProduction: NODE_ENV === 'production',
   isTest: NODE_ENV === 'test',
-  
+
   // Server
   port: parseInt(process.env.PORT || '3000', 10),
   baseURL: getBaseURL(),
-  
+
   // Database
   mongodb: {
     uri: getMongoURI(),
@@ -109,24 +107,24 @@ const config = {
       useUnifiedTopology: true,
       maxPoolSize: NODE_ENV === 'production' ? 10 : 5,
       serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
+      socketTimeoutMS: 45000
     }
   },
-  
+
   // JWT
   jwt: {
     secret: process.env.JWT_SECRET,
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
     algorithm: 'HS256'
   },
-  
+
   // Cloudinary
   cloudinary: {
     cloudName: process.env.CLOUDINARY_CLOUD_NAME,
     apiKey: process.env.CLOUDINARY_API_KEY,
     apiSecret: process.env.CLOUDINARY_API_SECRET
   },
-  
+
   // reCAPTCHA
   recaptcha: {
     siteKey: process.env.RECAPTCHA_SITE_KEY || '',
@@ -134,7 +132,7 @@ const config = {
     enabled: NODE_ENV === 'production',
     scoreThreshold: parseFloat(process.env.RECAPTCHA_SCORE_THRESHOLD || '0.5')
   },
-  
+
   // Security
   security: {
     bcryptRounds: 12,
@@ -144,13 +142,13 @@ const config = {
     rateLimitWindow: 15 * 60 * 1000, // 15 minutes
     rateLimitMax: NODE_ENV === 'production' ? 100 : 1000
   },
-  
+
   // File Upload
   upload: {
     maxFileSize: 5 * 1024 * 1024, // 5MB
     allowedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp']
   },
-  
+
   // Logging
   logging: {
     level: process.env.LOG_LEVEL || (NODE_ENV === 'production' ? 'info' : 'debug'),

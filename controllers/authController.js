@@ -2,8 +2,6 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const axios = require('axios');
-const config = require('../config/environment');
-const baseURL = config.baseURL;
 /**
  * Authentication Controller
  * Handles all authentication logic with security best practices

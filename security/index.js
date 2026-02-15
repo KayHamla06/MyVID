@@ -19,23 +19,23 @@ const applySecurity = (app) => {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         scriptSrc: [
-          "'self'", 
+          "'self'",
           "'unsafe-inline'",
-          "https://www.google.com/recaptcha/",
-          "https://www.gstatic.com/recaptcha/"
+          'https://www.google.com/recaptcha/',
+          'https://www.gstatic.com/recaptcha/'
         ],
-        fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        imgSrc: ["'self'", "data:", "https:", "blob:"],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+        imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
         connectSrc: ["'self'"],
-        frameSrc: ["https://www.google.com/recaptcha/"],
+        frameSrc: ['https://www.google.com/recaptcha/'],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: config.isProduction ? [] : null
       }
     },
     crossOriginEmbedderPolicy: false,
-    crossOriginResourcePolicy: { policy: "cross-origin" }
+    crossOriginResourcePolicy: { policy: 'cross-origin' }
   }));
 
   // CORS Configuration

@@ -29,25 +29,25 @@ jest.setTimeout(30000);
 // Global setup - runs once before all tests
 beforeAll(async () => {
   console.log('🧪 Setting up test environment...');
-  
+
   // Start in-memory mongo (if available) and connect to test database
   if (global.createInMemoryMongoServer) await global.createInMemoryMongoServer();
   await connectDB();
-  
+
   console.log('✅ Test environment ready');
 });
 
 // Global teardown - runs once after all tests
 afterAll(async () => {
   console.log('🧹 Cleaning up test environment...');
-  
+
   // Clear test database
   await clearDatabase();
-  
+
   // Disconnect from database
   await disconnectDB();
   if (mongod) await mongod.stop();
-  
+
   console.log('✅ Test environment cleaned up');
 });
 
@@ -61,7 +61,7 @@ beforeEach(async () => {
  */
 global.createTestUser = async (overrides = {}) => {
   const User = require('../models/User');
-  
+
   const userData = {
     email: 'test@example.com',
     password: 'Test1234',
@@ -70,10 +70,10 @@ global.createTestUser = async (overrides = {}) => {
     dateOfBirth: new Date('1990-01-01'),
     ...overrides
   };
-  
+
   const user = new User(userData);
   await user.save();
-  
+
   return user;
 };
 
@@ -83,7 +83,7 @@ global.createTestUser = async (overrides = {}) => {
 global.createAuthToken = (userId) => {
   const jwt = require('jsonwebtoken');
   const config = require('../config/environment');
-  
+
   return jwt.sign({ userId }, config.jwt.secret, {
     expiresIn: '1h'
   });

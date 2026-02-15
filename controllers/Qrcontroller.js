@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const { generateQR, generateQRBuffer } = require('../utils/qrGenerator');
 const { v4: uuidv4 } = require('uuid');
+const config = require('../config/environment');
 
 /**
  * @route   POST /api/user/qr/generate
@@ -25,7 +26,7 @@ exports.generateQR = async (req, res) => {
     }
 
     // Generate QR code URL
-    const qrUrl = `${process.env.SERVER_URL}/p/${user.qrId}`;
+    const qrUrl = `${config.baseURL}/p/${user.qrId}`;
 
     // Generate QR code as data URL for display
     const qrDataUrl = await generateQR(qrUrl);
@@ -35,7 +36,8 @@ exports.generateQR = async (req, res) => {
     res.status(200).json({
       success: true,
       qrDataUrl,
-      qrId: user.qrId
+      qrId: user.qrId,
+      publicUrl: qrUrl
     });
 
   } catch (error) {
@@ -79,7 +81,9 @@ exports.toggleQR = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      qrEnabled: user.qrEnabled
+      data: {
+        qrEnabled: user.qrEnabled
+      }
     });
 
   } catch (error) {
@@ -107,7 +111,7 @@ exports.downloadQRSVG = async (req, res) => {
       });
     }
 
-    const qrUrl = `${process.env.SERVER_URL}/p/${user.qrId}`;
+    const qrUrl = `${config.baseURL}/p/${user.qrId}`;
     const svgBuffer = await generateQRBuffer(qrUrl, 'svg');
 
     res.setHeader('Content-Type', 'image/svg+xml');
@@ -139,7 +143,7 @@ exports.downloadQRPNG = async (req, res) => {
       });
     }
 
-    const qrUrl = `${process.env.SERVER_URL}/p/${user.qrId}`;
+    const qrUrl = `${config.baseURL}/p/${user.qrId}`;
     const pngBuffer = await generateQRBuffer(qrUrl, 'png');
 
     res.setHeader('Content-Type', 'image/png');

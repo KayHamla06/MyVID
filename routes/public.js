@@ -52,7 +52,7 @@ router.get('/:qrId', async (req, res) => {
       </html>`;
 
     res.type('text/html').status(200).send(html);
-  } catch (err) {
+  } catch (_err) {
     res.status(500).send('Server error');
   }
 });
