@@ -1,9 +1,21 @@
 # reCAPTCHA Temporarily Disabled
 
-**Status:** ⚠️ **reCAPTCHA verification is DISABLED across the entire project**  
+**Status:** ⚠️ **reCAPTCHA verification is DISABLED everywhere (development, staging, and production)**  
 **Date:** February 15, 2026  
+**Scope:** ALL environments (not just dev/test)
 **Purpose:** Testing without bot protection requirement  
 **To Re-enable:** Follow instructions in this document
+
+---
+
+## ⚠️ IMPORTANT: Disabled in Production Too!
+
+Unlike typical development disabling, this disables reCAPTCHA **everywhere**:
+- ❌ Development - disabled
+- ❌ Staging - disabled  
+- ❌ **Production - ALSO DISABLED**
+
+When you re-enable, it will work in ALL environments unless you configure it otherwise.
 
 ---
 

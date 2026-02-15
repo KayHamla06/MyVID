@@ -2,12 +2,13 @@ const axios = require('axios');
 
 /**
  * Validate reCAPTCHA token
- * ⚠️ reCAPTCHA TEMPORARILY DISABLED
+ * ⚠️ reCAPTCHA TEMPORARILY DISABLED - EVERYWHERE (dev, staging, production)
  */
 exports.validateRecaptcha = async (req, res, next) => {
-  // reCAPTCHA verification temporarily disabled for testing
+  // reCAPTCHA verification temporarily disabled for all environments
+  // This disables bot protection in: development, staging, AND production
   // To re-enable, uncomment the code below and delete this early return
-  console.warn('⚠️  reCAPTCHA middleware disabled (temporarily)');
+  console.warn('⚠️  reCAPTCHA middleware disabled EVERYWHERE (temporarily)');
   return next();
   
   /* DISABLED CODE - KEPT FOR RE-ENABLING

@@ -17,13 +17,14 @@ const generateToken = (userId) => {
 };
 
 // ========================
-// reCAPTCHA TEMPORARILY DISABLED
+// reCAPTCHA TEMPORARILY DISABLED - EVERYWHERE (dev, staging, production)
 // ========================
 // Verify Google reCAPTCHA v3
 const verifyRecaptcha = async (token) => {
-  // reCAPTCHA verification temporarily disabled for testing
+  // reCAPTCHA verification temporarily disabled for all environments
+  // This disables bot protection in: development, staging, AND production
   // To re-enable, uncomment the code below
-  console.warn('⚠️  reCAPTCHA verification disabled (temporarily)');
+  console.warn('⚠️  reCAPTCHA verification disabled EVERYWHERE (temporarily)');
   return true;
   
   /* DISABLED CODE - KEPT FOR RE-ENABLING

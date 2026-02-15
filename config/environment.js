@@ -129,11 +129,11 @@ const config = {
   },
 
   // reCAPTCHA
-  // ⚠️ reCAPTCHA temporarily disabled
+  // ⚠️ reCAPTCHA TEMPORARILY DISABLED - EVERYWHERE (dev, staging, production)
   recaptcha: {
     siteKey: process.env.RECAPTCHA_SITE_KEY || '',
     secretKey: process.env.RECAPTCHA_SECRET_KEY || '',
-    enabled: false, // TEMPORARILY DISABLED - change to NODE_ENV === 'production' to re-enable
+    enabled: false, // DISABLED FOR ALL ENVIRONMENTS - change to NODE_ENV === 'production' to re-enable for production only
     scoreThreshold: parseFloat(process.env.RECAPTCHA_SCORE_THRESHOLD || '0.5')
   },
 
