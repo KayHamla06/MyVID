@@ -79,7 +79,7 @@ const getMongoURI = () => {
 const getBaseURL = () => {
   // Production: use APP_URL or Vercel URL
   if (NODE_ENV === 'production') {
-    return process.env.APP_URL || process.env.VERCEL_URL || 'https://safepass-id.vercel.app';
+    return process.env.APP_URL || process.env.VERCEL_URL || 'https://my-kn7w5l5a1-kayhamla06s-projects.vercel.app';
   }
   
   // Development/Test: use localhost

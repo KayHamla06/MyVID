@@ -1,11 +1,13 @@
 const mongoose = require('mongoose');
-const config = require('./environment');
 
 // Cache mongoose connection in global to prevent multiple connections
 const globalAny = global;
 if (!globalAny._mongoose) globalAny._mongoose = { conn: null, promise: null };
 
 const connectDB = async () => {
+  // Re-read config each call so tests can mutate process.env between cases
+  const config = require('./environment');
+
   if (globalAny._mongoose.conn) return globalAny._mongoose.conn;
 
   if (!globalAny._mongoose.promise) {
@@ -36,7 +38,8 @@ const disconnectDB = async () => {
 };
 
 const clearDatabase = async () => {
-  if (!config.isTest) throw new Error('clearDatabase may only be used in test environment');
+  // Check runtime NODE_ENV so tests can toggle it
+  if (process.env.NODE_ENV !== 'test') throw new Error('clearDatabase may only be used in test environment');
   const collections = mongoose.connection.collections;
   const promises = [];
   for (const key in collections) promises.push(collections[key].deleteMany({}));

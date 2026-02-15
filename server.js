@@ -5,7 +5,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
-const { connectDB } = require('./config/database');
+const { connectDB } = require('./config/Database');
 const { errorHandler, notFound } = require('./middleware/Errorhandler');
 const { apiLimiter } = require('./middleware/Ratelimiter');
 
@@ -66,6 +66,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
 app.use('/p', require('./routes/public'));
+app.use('/api/health', require('./routes/health'));
 
 // Serve HTML pages
 app.get('/', (req, res) => {

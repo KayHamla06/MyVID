@@ -260,4 +260,38 @@ UserSchema.methods.logQRAccess = async function (accessData) {
   await this.save();
 };
 
+// Method to verify identity information for password reset flows
+UserSchema.methods.verifyIdentity = function (info = {}) {
+  try {
+    const providedFirst = (info.firstName || '').toString().trim().toLowerCase();
+    const providedLast = (info.lastName || info.lastName || '').toString().trim().toLowerCase();
+    const providedDob = info.dateOfBirth ? new Date(info.dateOfBirth).toISOString().slice(0,10) : null;
+    const providedContactName = (info.emergencyContactName || '').toString().trim().toLowerCase();
+    const providedContactPhone = (info.emergencyContactPhone || '').toString().trim();
+
+    const userFirst = (this.firstName || '').toString().trim().toLowerCase();
+    const userLast = (this.fullDetails && this.fullDetails.lastName) ? this.fullDetails.lastName.toString().trim().toLowerCase() : (this.lastName || '').toString().trim().toLowerCase();
+    const userDob = (this.fullDetails && this.fullDetails.dob) ? new Date(this.fullDetails.dob).toISOString().slice(0,10) : (this.dateOfBirth ? new Date(this.dateOfBirth).toISOString().slice(0,10) : null);
+
+    // Basic checks
+    if (providedFirst && providedFirst !== userFirst) return false;
+    if (providedLast && providedLast !== userLast) return false;
+    if (providedDob && userDob && providedDob !== userDob) return false;
+
+    // Check emergency contact
+    if (providedContactName || providedContactPhone) {
+      const match = (this.emergencyContacts || []).some(c => {
+        const nameMatch = providedContactName ? (c.name || '').toString().trim().toLowerCase() === providedContactName : true;
+        const phoneMatch = providedContactPhone ? (c.phone || '').toString().trim() === providedContactPhone : true;
+        return nameMatch && phoneMatch;
+      });
+      if (!match) return false;
+    }
+
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
+
 module.exports = mongoose.model('User', UserSchema);

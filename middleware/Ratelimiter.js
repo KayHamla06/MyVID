@@ -41,6 +41,9 @@ exports.passwordResetLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false
+  ,
+  // Disable strict password reset limiting in non-production (local/testing)
+  skip: () => process.env.NODE_ENV !== 'production'
 });
 
 /**
