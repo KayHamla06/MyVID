@@ -16,8 +16,17 @@ const generateToken = (userId) => {
   );
 };
 
+// ========================
+// reCAPTCHA TEMPORARILY DISABLED
+// ========================
 // Verify Google reCAPTCHA v3
 const verifyRecaptcha = async (token) => {
+  // reCAPTCHA verification temporarily disabled for testing
+  // To re-enable, uncomment the code below
+  console.warn('⚠️  reCAPTCHA verification disabled (temporarily)');
+  return true;
+  
+  /* DISABLED CODE - KEPT FOR RE-ENABLING
   try {
     // Only verify in production
     if (process.env.NODE_ENV !== 'production') return true;
@@ -42,6 +51,7 @@ const verifyRecaptcha = async (token) => {
     // For development, you might want to fail open
     return process.env.NODE_ENV !== 'production';
   }
+  */
 };
 
 /**
@@ -54,7 +64,6 @@ exports.signup = async (req, res) => {
       email,
       password,
       confirmPassword,
-      recaptchaToken,
       firstName,
       lastName
     } = req.body;
@@ -95,7 +104,8 @@ exports.signup = async (req, res) => {
       });
     }
 
-    // Verify reCAPTCHA
+    // reCAPTCHA TEMPORARILY DISABLED - verification skipped
+    /* DISABLED CODE - KEPT FOR RE-ENABLING
     if (recaptchaToken) {
       const isHuman = await verifyRecaptcha(recaptchaToken);
       if (!isHuman) {
@@ -110,6 +120,7 @@ exports.signup = async (req, res) => {
         message: 'reCAPTCHA verification required'
       });
     }
+    */
 
     // Check if user already exists
     const existingUser = await User.findOne({ email: email.toLowerCase() });
@@ -181,7 +192,7 @@ exports.signup = async (req, res) => {
  */
 exports.login = async (req, res) => {
   try {
-    const { email, password, recaptchaToken } = req.body;
+    const { email, password } = req.body;
 
     // Validate input
     if (!email || !password) {
@@ -191,7 +202,8 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Verify reCAPTCHA if token provided
+    // reCAPTCHA TEMPORARILY DISABLED - verification skipped
+    /* DISABLED CODE - KEPT FOR RE-ENABLING
     if (recaptchaToken) {
       const isHuman = await verifyRecaptcha(recaptchaToken);
       if (!isHuman) {
@@ -201,6 +213,7 @@ exports.login = async (req, res) => {
         });
       }
     }
+    */
 
     // Find user by email
     const user = await User.findOne({ email: email.toLowerCase() });
@@ -463,7 +476,7 @@ exports.verifyToken = async (req, res) => {
  * @desc    Logout user and clear cookie
  * @access  Private
  */
-exports.logout = (req, res) => {
+exports.logout = async (req, res) => {
   res.cookie('token', 'none', {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true

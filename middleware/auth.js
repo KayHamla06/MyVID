@@ -2,8 +2,15 @@ const axios = require('axios');
 
 /**
  * Validate reCAPTCHA token
+ * ⚠️ reCAPTCHA TEMPORARILY DISABLED
  */
 exports.validateRecaptcha = async (req, res, next) => {
+  // reCAPTCHA verification temporarily disabled for testing
+  // To re-enable, uncomment the code below and delete this early return
+  console.warn('⚠️  reCAPTCHA middleware disabled (temporarily)');
+  return next();
+  
+  /* DISABLED CODE - KEPT FOR RE-ENABLING
   const { recaptchaToken } = req.body;
 
   // Only enforce reCAPTCHA in production
@@ -43,6 +50,7 @@ exports.validateRecaptcha = async (req, res, next) => {
     // Allow request to continue if reCAPTCHA service is down
     next();
   }
+  */
 };
 
 /**

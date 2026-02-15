@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let userEmail = '';
   const isProd = !['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.hostname !== '';
 
+  // reCAPTCHA TEMPORARILY DISABLED - widget not loaded
+  /* DISABLED CODE - KEPT FOR RE-ENABLING
   // Dynamically load reCAPTCHA only in production to avoid blocking dev/tests
   if (isProd) {
     const script = document.createElement('script');
@@ -16,11 +18,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const placeholder = document.getElementById('recaptcha-placeholder');
     if (placeholder) placeholder.style.display = 'none';
   }
+  */
+  // Hide reCAPTCHA widget
+  const placeholder = document.getElementById('recaptcha-placeholder');
+  if (placeholder) placeholder.style.display = 'none';
 
-  // reCAPTCHA callback
+  // reCAPTCHA callback (no-op since disabled)
   window.onRecaptchaSuccess = (token) => {
     recaptchaToken = token;
-    console.log('✅ reCAPTCHA verified successfully');
+    console.log('✅ reCAPTCHA disabled (development mode)');
   };
 
   const showNotification = (message, isError = false) => {
@@ -55,11 +61,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('forgot-password-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    // reCAPTCHA TEMPORARILY DISABLED - check commented out
+    /* DISABLED CODE - KEPT FOR RE-ENABLING
     // Require reCAPTCHA token only in production
     if (isProd && !recaptchaToken) {
       showNotification('Please verify reCAPTCHA.', true);
       return;
     }
+    */
 
     const email = document.getElementById('email').value.trim();
     const firstName = document.getElementById('firstName').value.trim();
@@ -98,14 +107,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 2000);
       } else {
         showNotification(data.message || 'Could not verify identity.', true);
-        grecaptcha.reset();
-        recaptchaToken = null;
+        // reCAPTCHA disabled
+        /* grecaptcha.reset();
+        recaptchaToken = null; */
       }
     } catch (err) {
       console.error('Forgot password error:', err);
       showNotification('Network error – check your internet connection.', true);
-      grecaptcha.reset();
-      recaptchaToken = null;
+      // reCAPTCHA disabled
+      /* grecaptcha.reset();
+      recaptchaToken = null; */
     }
   });
 

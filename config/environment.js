@@ -21,9 +21,12 @@ const requiredEnvVars = [
 ];
 
 // Only require reCAPTCHA in production
+// reCAPTCHA temporarily disabled - commented out requirement
+/* DISABLED - KEPT FOR RE-ENABLING
 if (NODE_ENV === 'production') {
   requiredEnvVars.push('RECAPTCHA_SITE_KEY', 'RECAPTCHA_SECRET_KEY');
 }
+*/
 
 // Validate environment variables
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
@@ -126,10 +129,11 @@ const config = {
   },
 
   // reCAPTCHA
+  // ⚠️ reCAPTCHA temporarily disabled
   recaptcha: {
     siteKey: process.env.RECAPTCHA_SITE_KEY || '',
     secretKey: process.env.RECAPTCHA_SECRET_KEY || '',
-    enabled: NODE_ENV === 'production',
+    enabled: false, // TEMPORARILY DISABLED - change to NODE_ENV === 'production' to re-enable
     scoreThreshold: parseFloat(process.env.RECAPTCHA_SCORE_THRESHOLD || '0.5')
   },
 

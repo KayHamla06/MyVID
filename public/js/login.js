@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let recaptchaToken = null;
   const isProd = !['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.hostname !== '';
 
+  // reCAPTCHA TEMPORARILY DISABLED - widget not loaded
+  /* DISABLED CODE - KEPT FOR RE-ENABLING
   if (isProd) {
     const script = document.createElement('script');
     script.src = 'https://www.google.com/recaptcha/api.js';
@@ -13,11 +15,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const placeholder = document.getElementById('recaptcha-placeholder');
     if (placeholder) placeholder.style.display = 'none';
   }
+  */
+  // Hide reCAPTCHA widget
+  const placeholder = document.getElementById('recaptcha-placeholder');
+  if (placeholder) placeholder.style.display = 'none';
 
-  // reCAPTCHA callback
+  // reCAPTCHA callback (no-op since disabled)
   window.onRecaptchaSuccess = (token) => {
     recaptchaToken = token;
-    console.log('✅ reCAPTCHA verified successfully');
+    console.log('✅ reCAPTCHA disabled (development mode)');
   };
 
   const showNotification = (message, isServerError = false) => {
@@ -40,10 +46,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    // reCAPTCHA TEMPORARILY DISABLED - check commented out
+    /* DISABLED CODE - KEPT FOR RE-ENABLING
     if (isProd && !recaptchaToken) {
       showNotification('Please verify reCAPTCHA.', false);
       return;
     }
+    */
 
     const email = document.getElementById('email')?.value?.trim();
     const password = document.getElementById('password')?.value;
@@ -76,14 +85,16 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = '/dashboard';
       } else {
         showNotification(data.message || 'Login failed.', res.status >= 500);
-        if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
-        recaptchaToken = null;
+        // reCAPTCHA disabled
+        /* if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
+        recaptchaToken = null; */
       }
     } catch (err) {
       console.error('Login fetch error:', err);
       showNotification('Network error – check your internet connection.', true);
-      if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
-      recaptchaToken = null;
+      // reCAPTCHA disabled
+      /* if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
+      recaptchaToken = null; */
     }
   });
 });
