@@ -106,8 +106,6 @@ const config = {
   mongodb: {
     uri: getMongoURI(),
     options: {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       maxPoolSize: NODE_ENV === 'production' ? 10 : 5,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000

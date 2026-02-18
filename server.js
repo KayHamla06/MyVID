@@ -25,7 +25,7 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", 'https://www.google.com', 'https://www.gstatic.com'],
+      scriptSrc: ["'self'", "'unsafe-inline'", 'https://www.google.com', 'https://www.gstatic.com', 'https://vercel.live'],
       imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
       connectSrc: ["'self'"],
       fontSrc: ["'self'"],
