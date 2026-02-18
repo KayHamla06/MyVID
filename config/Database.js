@@ -4,29 +4,79 @@ const mongoose = require('mongoose');
 const globalAny = global;
 if (!globalAny._mongoose) globalAny._mongoose = { conn: null, promise: null };
 
-const connectDB = async () => {
+// Connection retry configuration
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 5000; // 5 seconds
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+const connectDB = async (retryCount = 0) => {
   // Re-read config each call so tests can mutate process.env between cases
   const config = require('./environment');
 
-  if (globalAny._mongoose.conn) return globalAny._mongoose.conn;
+  if (globalAny._mongoose.conn && mongoose.connection.readyState === 1) {
+    return globalAny._mongoose.conn;
+  }
+
+  // Reset if previous connection failed
+  if (mongoose.connection.readyState === 0 && globalAny._mongoose.promise) {
+    globalAny._mongoose.promise = null;
+    globalAny._mongoose.conn = null;
+  }
 
   if (!globalAny._mongoose.promise) {
     globalAny._mongoose.promise = mongoose
       .connect(config.mongodb.uri, config.mongodb.options)
-      .then((m) => m.connection);
+      .then((m) => {
+        console.log('✅ MongoDB connected successfully');
+        return m.connection;
+      })
+      .catch(async (error) => {
+        globalAny._mongoose.promise = null;
+        globalAny._mongoose.conn = null;
+        
+        if (retryCount < MAX_RETRIES) {
+          console.warn(`⚠️  MongoDB connection failed. Retrying in ${RETRY_DELAY/1000}s... (${retryCount + 1}/${MAX_RETRIES})`);
+          await sleep(RETRY_DELAY);
+          return connectDB(retryCount + 1);
+        }
+        
+        console.error(`❌ MongoDB connection failed after ${MAX_RETRIES} retries:`, error.message);
+        throw error;
+      });
   }
 
   globalAny._mongoose.conn = await globalAny._mongoose.promise;
 
   mongoose.connection.on('error', (err) => {
     console.error(`❌ MongoDB connection error: ${err}`);
+    globalAny._mongoose.conn = null;
+    globalAny._mongoose.promise = null;
   });
 
   mongoose.connection.on('disconnected', () => {
     console.warn('⚠️  MongoDB disconnected');
+    globalAny._mongoose.conn = null;
+    globalAny._mongoose.promise = null;
   });
 
   return globalAny._mongoose.conn;
+};
+
+// Middleware to ensure DB connection before operations
+const ensureConnection = async (req, res, next) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      await connectDB();
+    }
+    next();
+  } catch (error) {
+    console.error('Database connection check failed:', error.message);
+    res.status(503).json({
+      success: false,
+      message: 'Database temporarily unavailable. Please try again later.'
+    });
+  }
 };
 
 const disconnectDB = async () => {
@@ -56,4 +106,4 @@ const healthCheck = async () => {
   return status.isConnected ? { healthy: true, message: 'Connected', database: status.dbName } : { healthy: false, message: 'Not connected' };
 };
 
-module.exports = { connectDB, disconnectDB, clearDatabase, getConnectionStatus, healthCheck };
+module.exports = { connectDB, disconnectDB, clearDatabase, getConnectionStatus, healthCheck, ensureConnection };

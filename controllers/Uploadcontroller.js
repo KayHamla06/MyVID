@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const { cloudinary } = require('../config/cloudinary');
+const { cloudinary, isConfigured } = require('../config/cloudinary');
 const multer = require('multer');
 
 // Configure multer for memory storage
@@ -34,6 +34,14 @@ exports.uploadMiddleware = upload.single('photo');
  */
 exports.uploadPhoto = async (req, res) => {
   try {
+    // Check if Cloudinary is configured
+    if (!isConfigured) {
+      return res.status(503).json({
+        success: false,
+        message: 'Image upload service is not configured. Please contact support.'
+      });
+    }
+
     if (!req.file) {
       return res.status(400).json({
         success: false,

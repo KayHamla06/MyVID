@@ -29,6 +29,13 @@ const UserSchema = new mongoose.Schema({
   },
   passwordResetToken: String,
   passwordResetExpires: Date,
+  passwordResetAttempts: {
+    type: Number,
+    default: 0
+  },
+  passwordResetLockUntil: {
+    type: Date
+  },
 
   // Basic Profile Information
   firstName: {
@@ -208,6 +215,41 @@ UserSchema.methods.resetLoginAttempts = function () {
   });
 };
 
+// Virtual for password reset locked status
+UserSchema.virtual('isPasswordResetLocked').get(function () {
+  return !!(this.passwordResetLockUntil && this.passwordResetLockUntil > Date.now());
+});
+
+// Method to increment password reset attempts
+UserSchema.methods.incPasswordResetAttempts = function () {
+  const maxAttempts = 5;
+  const lockTime = 30 * 60 * 1000; // 30 minutes
+
+  // If previous lock expired, reset counter
+  if (this.passwordResetLockUntil && this.passwordResetLockUntil < Date.now()) {
+    return this.updateOne({
+      $set: { passwordResetAttempts: 1 },
+      $unset: { passwordResetLockUntil: 1 }
+    });
+  }
+
+  const updates = { $inc: { passwordResetAttempts: 1 } };
+
+  if (this.passwordResetAttempts + 1 >= maxAttempts && !this.isPasswordResetLocked) {
+    updates.$set = { passwordResetLockUntil: Date.now() + lockTime };
+  }
+
+  return this.updateOne(updates);
+};
+
+// Method to reset password reset attempts
+UserSchema.methods.resetPasswordResetAttempts = function () {
+  return this.updateOne({
+    $set: { passwordResetAttempts: 0 },
+    $unset: { passwordResetLockUntil: 1 }
+  });
+};
+
 // Method to get safe user data (no sensitive info)
 UserSchema.methods.getSafeProfile = function () {
   return {
@@ -261,36 +303,52 @@ UserSchema.methods.logQRAccess = async function (accessData) {
 };
 
 // Method to verify identity information for password reset flows
+// Returns { success: boolean, failedField?: string } to indicate which field failed
 UserSchema.methods.verifyIdentity = function (info = {}) {
   try {
     const providedFirst = (info.firstName || '').toString().trim().toLowerCase();
-    const providedLast = (info.lastName || info.lastName || '').toString().trim().toLowerCase();
+    const providedLast = (info.lastName || '').toString().trim().toLowerCase();
     const providedDob = info.dateOfBirth ? new Date(info.dateOfBirth).toISOString().slice(0,10) : null;
     const providedContactName = (info.emergencyContactName || '').toString().trim().toLowerCase();
-    const providedContactPhone = (info.emergencyContactPhone || '').toString().trim();
+    const providedContactPhone = (info.emergencyContactPhone || '').toString().trim().replace(/\s+/g, '');
 
     const userFirst = (this.firstName || '').toString().trim().toLowerCase();
-    const userLast = (this.fullDetails && this.fullDetails.lastName) ? this.fullDetails.lastName.toString().trim().toLowerCase() : (this.lastName || '').toString().trim().toLowerCase();
-    const userDob = (this.fullDetails && this.fullDetails.dob) ? new Date(this.fullDetails.dob).toISOString().slice(0,10) : (this.dateOfBirth ? new Date(this.dateOfBirth).toISOString().slice(0,10) : null);
+    const userLast = (this.fullDetails && this.fullDetails.lastName) ? this.fullDetails.lastName.toString().trim().toLowerCase() : '';
+    const userDob = (this.fullDetails && this.fullDetails.dob) ? new Date(this.fullDetails.dob).toISOString().slice(0,10) : null;
 
-    // Basic checks
-    if (providedFirst && providedFirst !== userFirst) return false;
-    if (providedLast && providedLast !== userLast) return false;
-    if (providedDob && userDob && providedDob !== userDob) return false;
-
-    // Check emergency contact
-    if (providedContactName || providedContactPhone) {
-      const match = (this.emergencyContacts || []).some(c => {
-        const nameMatch = providedContactName ? (c.name || '').toString().trim().toLowerCase() === providedContactName : true;
-        const phoneMatch = providedContactPhone ? (c.phone || '').toString().trim() === providedContactPhone : true;
-        return nameMatch && phoneMatch;
-      });
-      if (!match) return false;
+    // Check first name
+    if (!userFirst || providedFirst !== userFirst) {
+      return { success: false, failedField: 'firstName' };
     }
 
-    return true;
+    // Check last name
+    if (!userLast || providedLast !== userLast) {
+      return { success: false, failedField: 'lastName' };
+    }
+
+    // Check date of birth
+    if (!userDob || !providedDob || providedDob !== userDob) {
+      return { success: false, failedField: 'dateOfBirth' };
+    }
+
+    // Check emergency contact (must have at least one contact to verify against)
+    if (!this.emergencyContacts || this.emergencyContacts.length === 0) {
+      return { success: false, failedField: 'emergencyContact', reason: 'No emergency contacts on file' };
+    }
+
+    const contactMatch = this.emergencyContacts.some(c => {
+      const storedName = (c.name || '').toString().trim().toLowerCase();
+      const storedPhone = (c.phone || '').toString().trim().replace(/\s+/g, '');
+      return storedName === providedContactName && storedPhone === providedContactPhone;
+    });
+
+    if (!contactMatch) {
+      return { success: false, failedField: 'emergencyContact' };
+    }
+
+    return { success: true };
   } catch (_err) {
-    return false;
+    return { success: false, failedField: 'unknown', reason: 'Verification error' };
   }
 };
 

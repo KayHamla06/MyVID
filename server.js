@@ -8,6 +8,7 @@ const xss = require('xss-clean');
 const { connectDB } = require('./config/Database');
 const { errorHandler, notFound } = require('./middleware/Errorhandler');
 const { apiLimiter } = require('./middleware/Ratelimiter');
+const { ensureConnection } = require('./config/Database');
 
 const app = express();
 const PORT = config.port || 3001;
@@ -58,6 +59,9 @@ app.use(xss()); // Prevent XSS attacks
 
 // Rate limiting
 app.use('/api/', apiLimiter);
+
+// Ensure database connection for API routes
+app.use('/api/', ensureConnection);
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));

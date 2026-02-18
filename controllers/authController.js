@@ -287,6 +287,7 @@ exports.login = async (req, res) => {
 /**
  * FORGOT PASSWORD - Step 1: Identity Verification
  * Verifies user identity before allowing password reset
+ * Includes rate limiting and detailed field validation
  */
 exports.forgotPassword = async (req, res) => {
   try {
@@ -314,12 +315,24 @@ exports.forgotPassword = async (req, res) => {
       // Don't reveal if email exists for security
       return res.status(400).json({
         success: false,
-        message: 'The information provided does not match our records. Please verify your details and try again.'
+        message: 'The information provided does not match our records. Please verify your details and try again.',
+        failedField: 'email'
       });
     }
 
-    // Verify identity
-    const identityVerified = user.verifyIdentity({
+    // Check if password reset is locked due to too many attempts
+    if (user.isPasswordResetLocked) {
+      const lockTimeRemaining = Math.ceil((user.passwordResetLockUntil - Date.now()) / 1000 / 60);
+      return res.status(429).json({
+        success: false,
+        message: `Too many failed verification attempts. Please try again in ${lockTimeRemaining} minutes.`,
+        locked: true,
+        lockUntil: user.passwordResetLockUntil
+      });
+    }
+
+    // Verify identity - now returns { success, failedField }
+    const verificationResult = user.verifyIdentity({
       firstName,
       lastName,
       dateOfBirth,
@@ -327,12 +340,31 @@ exports.forgotPassword = async (req, res) => {
       emergencyContactPhone
     });
 
-    if (!identityVerified) {
+    if (!verificationResult.success) {
+      // Increment failed attempts
+      await user.incPasswordResetAttempts();
+      
+      // Provide specific feedback about which field failed
+      const fieldMessages = {
+        firstName: 'The first name does not match our records.',
+        lastName: 'The last name does not match our records.',
+        dateOfBirth: 'The date of birth does not match our records.',
+        emergencyContact: 'The emergency contact information does not match our records.'
+      };
+
+      const attemptsRemaining = 5 - (user.passwordResetAttempts + 1);
+      
       return res.status(400).json({
         success: false,
-        message: 'We could not verify your identity. Please ensure all information is correct, including your emergency contact details.'
+        message: fieldMessages[verificationResult.failedField] || 'Identity verification failed.',
+        failedField: verificationResult.failedField,
+        attemptsRemaining: Math.max(0, attemptsRemaining),
+        hint: attemptsRemaining <= 2 ? 'Please double-check your information carefully.' : undefined
       });
     }
+
+    // Reset attempts on successful verification
+    await user.resetPasswordResetAttempts();
 
     // Generate password reset token
     const resetToken = crypto.randomBytes(32).toString('hex');

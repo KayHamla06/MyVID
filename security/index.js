@@ -56,7 +56,8 @@ const applySecurity = (app) => {
         allowedOrigins.push(
           process.env.APP_URL,
           process.env.VERCEL_URL,
-          /\.vercel\.app$/
+          /\.vercel\.app$/,
+          /\.onrender\.com$/
         );
       }
 
