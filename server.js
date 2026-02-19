@@ -26,8 +26,8 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", 'https://www.google.com', 'https://www.gstatic.com', 'https://vercel.live'],
-      imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
+      scriptSrc: ["'self'", "'unsafe-inline'", 'https://www.google.com', 'https://www.gstatic.com'],
+      imgSrc: ["'self'", 'data:', 'https:', 'blob:', 'https://res.cloudinary.com'],
       connectSrc: ["'self'"],
       fontSrc: ["'self'"],
       objectSrc: ["'none'"],
@@ -70,6 +70,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
 app.use('/p', require('./routes/public'));
+app.use('/publicinfo', require('./routes/publicinfo'));
 app.use('/api/health', require('./routes/health'));
 
 // Serve HTML pages
@@ -103,14 +104,11 @@ app.use(notFound);
 // Error handler
 app.use(errorHandler);
 
-// Start server only when executed directly (keeps module safe for serverless imports)
-let server;
-if (require.main === module) {
-  server = app.listen(PORT, () => {
-    console.log(`SafePass ID Server Running - Port: ${PORT} - Env: ${config.env}`);
-    console.log(`Base URL: ${config.baseURL}`);
-  });
-}
+// Start server (Render persistent Node.js server)
+const server = app.listen(PORT, () => {
+  console.log(`SafePass ID Server Running - Port: ${PORT} - Env: ${config.env}`);
+  console.log(`Base URL: ${config.baseURL}`);
+});
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err, _promise) => {

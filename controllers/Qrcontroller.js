@@ -1,7 +1,25 @@
 const User = require('../models/User');
-const { generateQR, generateQRBuffer } = require('../utils/qrGenerator');
+const { generateQR, generateQRBuffer, buildPublicUrl } = require('../utils/qrGenerator');
 const { v4: uuidv4 } = require('uuid');
 const config = require('../config/environment');
+
+/**
+ * Generate a unique username from firstName
+ * Format: profile_firstname_randomsuffix
+ */
+const generateUsername = async (firstName) => {
+  const baseName = (firstName || 'user').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const suffix = uuidv4().slice(0, 8);
+  let username = `profile_${baseName}`;
+  
+  // Check if exists, add suffix if needed
+  const existing = await User.findOne({ username });
+  if (existing) {
+    username = `profile_${baseName}_${suffix}`;
+  }
+  
+  return username;
+};
 
 /**
  * @route   POST /api/user/qr/generate
@@ -19,24 +37,32 @@ exports.generateQR = async (req, res) => {
       });
     }
 
-    // Generate unique QR ID if doesn't exist
+    // Generate unique username if doesn't exist
+    if (!user.username) {
+      user.username = await generateUsername(user.firstName);
+      await user.save();
+    }
+
+    // Generate unique QR ID for backward compatibility
     if (!user.qrId) {
       user.qrId = uuidv4();
       await user.save();
     }
 
-    // Generate QR code URL
-    const qrUrl = `${config.baseURL}/p/${user.qrId}`;
+    // Generate QR code URL using username (new format)
+    // URL: https://www.safepassid.co.za/publicinfo/profile_username
+    const qrUrl = buildPublicUrl(user.username);
 
     // Generate QR code as data URL for display
     const qrDataUrl = await generateQR(qrUrl);
 
-    console.log(`✅ QR code generated for user: ${user.email}`);
+    console.log(`✅ QR code generated for user: ${user.email} - URL: ${qrUrl}`);
 
     res.status(200).json({
       success: true,
       qrDataUrl,
       qrId: user.qrId,
+      username: user.username,
       publicUrl: qrUrl
     });
 
@@ -104,14 +130,14 @@ exports.downloadQRSVG = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
 
-    if (!user || !user.qrId) {
+    if (!user || !user.username) {
       return res.status(404).json({
         success: false,
-        message: 'QR code not found'
+        message: 'QR code not found. Please generate a QR code first.'
       });
     }
 
-    const qrUrl = `${config.baseURL}/p/${user.qrId}`;
+    const qrUrl = buildPublicUrl(user.username);
     const svgBuffer = await generateQRBuffer(qrUrl, 'svg');
 
     res.setHeader('Content-Type', 'image/svg+xml');
@@ -136,14 +162,14 @@ exports.downloadQRPNG = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
 
-    if (!user || !user.qrId) {
+    if (!user || !user.username) {
       return res.status(404).json({
         success: false,
-        message: 'QR code not found'
+        message: 'QR code not found. Please generate a QR code first.'
       });
     }
 
-    const qrUrl = `${config.baseURL}/p/${user.qrId}`;
+    const qrUrl = buildPublicUrl(user.username);
     const pngBuffer = await generateQRBuffer(qrUrl, 'png');
 
     res.setHeader('Content-Type', 'image/png');

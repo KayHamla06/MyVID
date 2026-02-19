@@ -18,6 +18,16 @@ const UserSchema = new mongoose.Schema({
     minlength: [6, 'Password must be at least 6 characters'],
     select: false // Don't return password by default
   },
+  
+  // Public Profile Username (for QR codes)
+  username: {
+    type: String,
+    unique: true,
+    sparse: true, // Allow multiple null values
+    lowercase: true,
+    trim: true,
+    match: [/^[a-z0-9_]+$/, 'Username can only contain lowercase letters, numbers, and underscores']
+  },
 
   // Security features
   loginAttempts: {

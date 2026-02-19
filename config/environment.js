@@ -78,14 +78,14 @@ const getMongoURI = () => {
  * Used for QR code generation and redirects
  */
 const getBaseURL = () => {
-  // Production: use APP_URL or Vercel URL
-  if (NODE_ENV === 'production') {
-    return process.env.APP_URL || process.env.VERCEL_URL || 'https://my-kn7w5l5a1-kayhamla06s-projects.vercel.app';
+  // Production: use BASE_URL environment variable
+  if (process.env.BASE_URL) {
+    return process.env.BASE_URL.replace(/\/$/, ''); // Remove trailing slash
   }
 
-  // Development/Test: use localhost
+  // Development fallback
   const port = process.env.PORT || 3000;
-  return process.env.BASE_URL || `http://localhost:${port}`;
+  return `http://localhost:${port}`;
 };
 
 /**

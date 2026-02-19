@@ -54,10 +54,9 @@ const applySecurity = (app) => {
       // In production, add your production URLs
       if (config.isProduction) {
         allowedOrigins.push(
-          process.env.APP_URL,
-          process.env.VERCEL_URL,
-          /\.vercel\.app$/,
-          /\.onrender\.com$/
+          process.env.BASE_URL,
+          /\.onrender\.com$/,
+          /safepassid\.co\.za$/
         );
       }
 

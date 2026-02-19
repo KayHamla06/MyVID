@@ -1,8 +1,16 @@
 const QRCode = require('qrcode');
 const config = require('../config/environment');
 
-// Helper to build public profile URL for a given QR id
-exports.buildPublicUrl = (qrId) => `${config.baseURL.replace(/\/$/, '')}/p/${qrId}`;
+/**
+ * Build public profile URL for QR code
+ * Format: https://www.safepassid.co.za/publicinfo/profile_username
+ * @param {string} username - User's unique username
+ * @returns {string} - Full public profile URL
+ */
+exports.buildPublicUrl = (username) => {
+  const baseUrl = config.baseURL.replace(/\/$/, ''); // Remove trailing slash
+  return `${baseUrl}/publicinfo/${username}`;
+};
 
 /**
  * Generate QR code as data URL for display
