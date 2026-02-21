@@ -50,7 +50,7 @@ exports.generateQR = async (req, res) => {
     }
 
     // Generate QR code URL using username (new format)
-    // URL: https://www.safepassid.co.za/publicinfo/profile_username
+    // URL: https://safepassid.xyz/publicinfo/profile_username
     const qrUrl = buildPublicUrl(user.username);
 
     // Generate QR code as data URL for display

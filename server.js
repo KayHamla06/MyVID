@@ -69,39 +69,80 @@ app.use(express.static(path.join(__dirname, 'public')));
 // API Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
+app.use('/api/admin', require('./routes/admin'));
 app.use('/p', require('./routes/public'));
 app.use('/publicinfo', require('./routes/publicinfo'));
 app.use('/api/health', require('./routes/health'));
 
-// Serve HTML pages
+// Serve HTML pages with proper error handling
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'landing.html'));
+  res.sendFile(path.join(__dirname, 'public', 'landing.html'), (err) => {
+    if (err && !res.headersSent) res.status(500).send('Server error');
+  });
 });
 
 app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+  res.sendFile(path.join(__dirname, 'public', 'login.html'), (err) => {
+    if (err && !res.headersSent) res.status(500).send('Server error');
+  });
 });
 
 app.get('/signup', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'signup.html'));
+  res.sendFile(path.join(__dirname, 'public', 'signup.html'), (err) => {
+    if (err && !res.headersSent) res.status(500).send('Server error');
+  });
 });
 
 app.get('/dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'), (err) => {
+    if (err && !res.headersSent) res.status(500).send('Server error');
+  });
 });
 
 app.get('/forgot-password', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'forgot-password.html'));
+  res.sendFile(path.join(__dirname, 'public', 'forgot-password.html'), (err) => {
+    if (err && !res.headersSent) res.status(500).send('Server error');
+  });
 });
 
 app.get('/disabled', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'disabled.html'));
+  res.sendFile(path.join(__dirname, 'public', 'disabled.html'), (err) => {
+    if (err && !res.headersSent) res.status(500).send('Server error');
+  });
 });
 
-// 404 handler
-app.use(notFound);
+app.get('/terms', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'terms.html'), (err) => {
+    if (err && !res.headersSent) res.status(500).send('Server error');
+  });
+});
 
-// Error handler
+app.get('/privacy', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'privacy.html'), (err) => {
+    if (err && !res.headersSent) res.status(500).send('Server error');
+  });
+});
+
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'), (err) => {
+    if (err && !res.headersSent) res.status(500).send('Server error');
+  });
+});
+
+// Health check endpoint (for Render)
+app.get('/health-check', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// 404 handler (must be before error handler)
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
+});
+
+// Error handler (must be last)
 app.use(errorHandler);
 
 // Start server (Render persistent Node.js server)

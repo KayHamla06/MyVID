@@ -18,7 +18,19 @@ const UserSchema = new mongoose.Schema({
     minlength: [6, 'Password must be at least 6 characters'],
     select: false // Don't return password by default
   },
-  
+  phoneNumber: {
+    type: String,
+    unique: true,
+    sparse: true,
+    trim: true,
+    validate: {
+      validator: function (v) {
+        if (!v) return true; // Allow empty
+        return /^[\d\s\-\+\(\)]{10,}$/.test(v); // Allow international formats
+      },
+      message: 'Please provide a valid phone number (at least 10 digits)'
+    }
+  },
   // Public Profile Username (for QR codes)
   username: {
     type: String,
@@ -127,6 +139,10 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  qrScanCount: {
+    type: Number,
+    default: 0
+  },
   qrAccessLogs: [{
     timestamp: {
       type: Date,
@@ -144,7 +160,7 @@ const UserSchema = new mongoose.Schema({
   },
   accountStatus: {
     type: String,
-    enum: ['active', 'locked', 'suspended'],
+    enum: ['active', 'locked', 'suspended', 'pending_deletion'],
     default: 'active'
   },
 

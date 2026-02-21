@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const { cloudinary, isConfigured } = require('../config/cloudinary');
+const { validateImage, getCloudinaryOptions, getOptimizedImageUrl } = require('../utils/imageOptimization');
 const multer = require('multer');
 
 // Configure multer for memory storage
@@ -29,7 +30,7 @@ exports.uploadMiddleware = upload.single('photo');
 
 /**
  * @route   POST /api/user/upload-photo
- * @desc    Upload profile photo to Cloudinary
+ * @desc    Upload profile photo to Cloudinary with compression
  * @access  Private
  */
 exports.uploadPhoto = async (req, res) => {
@@ -49,6 +50,15 @@ exports.uploadPhoto = async (req, res) => {
       });
     }
 
+    // Validate image
+    const validation = validateImage(req.file);
+    if (!validation.valid) {
+      return res.status(400).json({
+        success: false,
+        message: validation.errors.join('; ')
+      });
+    }
+
     const user = await User.findById(req.user.id);
 
     if (!user) {
@@ -64,7 +74,7 @@ exports.uploadPhoto = async (req, res) => {
         // Extract public_id from Cloudinary URL
         const urlParts = user.profilePhoto.split('/');
         const publicIdWithExt = urlParts[urlParts.length - 1];
-        const publicId = `safepass/${publicIdWithExt.split('.')[0]}`;
+        const publicId = `safepassid/profiles/${publicIdWithExt.split('.')[0]}`;
 
         await cloudinary.uploader.destroy(publicId);
       } catch (error) {
@@ -73,16 +83,12 @@ exports.uploadPhoto = async (req, res) => {
       }
     }
 
-    // Upload to Cloudinary using buffer
+    // Upload to Cloudinary using optimized buffer
+    const uploadOptions = getCloudinaryOptions();
+    
     const uploadPromise = new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder: 'safepass',
-          transformation: [
-            { width: 500, height: 500, crop: 'limit' },
-            { quality: 'auto', fetch_format: 'auto' }
-          ]
-        },
+        uploadOptions,
         (error, result) => {
           if (error) reject(error);
           else resolve(result);
@@ -98,12 +104,17 @@ exports.uploadPhoto = async (req, res) => {
     user.profilePhoto = result.secure_url;
     await user.save();
 
-    console.log(`✅ Photo uploaded for user: ${user.email}`);
+    console.log(`✅ Photo uploaded for user: ${user.email} (${(validation.size / 1024 / 1024).toFixed(2)}MB)`);
 
     res.status(200).json({
       success: true,
       message: 'Photo uploaded successfully',
-      photoUrl: result.secure_url
+      photoUrl: result.secure_url,
+      optimizedUrls: {
+        thumbnail: getOptimizedImageUrl(result.secure_url, 'thumbnail'),
+        medium: getOptimizedImageUrl(result.secure_url, 'medium'),
+        original: result.secure_url
+      }
     });
 
   } catch (error) {

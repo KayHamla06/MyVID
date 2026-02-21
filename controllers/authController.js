@@ -189,17 +189,28 @@ exports.signup = async (req, res) => {
 
 /**
  * LOGIN
- * Authenticates user with email and password
+ * Authenticates user with email/phone number and password
  */
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { loginIdentifier, password } = req.body;
 
     // Validate input
-    if (!email || !password) {
+    if (!loginIdentifier || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide email and password'
+        message: 'Please provide email or phone number and password'
+      });
+    }
+
+    // Detect login type (email vs phone)
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginIdentifier);
+    const isPhone = /^[\d\s\-\+\(\)]{10,}$/.test(loginIdentifier.trim());
+
+    if (!isEmail && !isPhone) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address or phone number'
       });
     }
 
@@ -216,13 +227,18 @@ exports.login = async (req, res) => {
     }
     */
 
-    // Find user by email
-    const user = await User.findOne({ email: email.toLowerCase() });
+    // Find user by email or phone number
+    let user;
+    if (isEmail) {
+      user = await User.findOne({ email: loginIdentifier.toLowerCase() });
+    } else {
+      user = await User.findOne({ phoneNumber: loginIdentifier.trim() });
+    }
 
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        message: 'Invalid credentials'
       });
     }
 
@@ -246,7 +262,7 @@ exports.login = async (req, res) => {
 
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        message: 'Invalid credentials'
       });
     }
 
@@ -269,6 +285,7 @@ exports.login = async (req, res) => {
       user: {
         id: user._id,
         email: user.email,
+        phoneNumber: user.phoneNumber || null,
         firstName: user.firstName,
         lastName: user.lastName,
         profilePhoto: user.profilePhoto

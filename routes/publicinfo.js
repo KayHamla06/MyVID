@@ -55,12 +55,16 @@ router.get('/:username', async (req, res) => {
         ipAddress: ip,
         userAgent
       });
+
+      // Increment QR scan count
+      user.qrScanCount = (user.qrScanCount || 0) + 1;
+      await user.save();
     } catch (logError) {
       console.warn('Failed to log access:', logError.message);
       // Continue even if logging fails
     }
 
-    // Return PUBLIC-ONLY data
+    // Return PUBLIC-ONLY data (optimized for low data usage)
     const publicContacts = (user.emergencyContacts || [])
       .filter(contact => contact.isPublic)
       .map(contact => ({
@@ -68,12 +72,14 @@ router.get('/:username', async (req, res) => {
         phone: contact.phone
       }));
 
+    // Minimal payload optimization
     const publicProfile = {
       firstName: user.firstName || null,
       country: user.country || null,
       profilePhoto: user.profilePhoto || null,
       medicalAlerts: user.medicalAlerts || [],
-      emergencyContacts: publicContacts
+      emergencyContacts: publicContacts,
+      phoneNumber: user.phoneNumber || null
     };
 
     res.status(200).json({
@@ -123,6 +129,10 @@ router.get('/:username/html', async (req, res) => {
         ipAddress: ip,
         userAgent
       });
+
+      // Increment QR scan count
+      user.qrScanCount = (user.qrScanCount || 0) + 1;
+      await user.save();
     } catch (logError) {
       console.warn('Failed to log access:', logError.message);
     }

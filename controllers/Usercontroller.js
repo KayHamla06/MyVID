@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const { sendAccountDeletionRequest } = require('../utils/emailService');
 
 /**
  * @route   GET /api/user/profile
@@ -39,6 +40,7 @@ exports.updateProfile = async (req, res) => {
   try {
     const allowedFields = [
       'firstName',
+      'phoneNumber',
       'country',
       'emergencyContacts',
       'medicalAlerts',
@@ -121,7 +123,7 @@ exports.getQRAccessLogs = async (req, res) => {
 
 /**
  * @route   DELETE /api/user/account
- * @desc    Delete user account (soft delete)
+ * @desc    Request account deletion (sends email to admin for review)
  * @access  Private
  */
 exports.deleteAccount = async (req, res) => {
@@ -146,24 +148,26 @@ exports.deleteAccount = async (req, res) => {
       });
     }
 
-    // Soft delete - deactivate account
-    user.isActive = false;
-    user.accountStatus = 'suspended';
-    user.qrEnabled = false;
+    // Mark account for deletion (pending admin approval)
+    user.accountStatus = 'pending_deletion';
+    user.qrEnabled = false; // Disable QR immediately
     await user.save();
 
-    console.log(`⚠️  Account deleted: ${user.email}`);
+    // Send email notification to admin
+    await sendAccountDeletionRequest(user);
+
+    console.log(`📧 Account deletion request submitted: ${user.email}`);
 
     res.status(200).json({
       success: true,
-      message: 'Account deleted successfully'
+      message: 'Your account deletion request has been submitted. An administrator will review and process your request shortly.'
     });
 
   } catch (error) {
     console.error('Delete account error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error deleting account'
+      message: 'Error processing account deletion request'
     });
   }
 };
