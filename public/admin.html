@@ -397,7 +397,7 @@
       <!-- Header -->
       <div class="header">
         <h1>💼 SafePass ID Admin Dashboard</h1>
-        <button class="logout-btn" onclick="logout()">Logout</button>
+        <button class="logout-btn" id="logoutBtn">Logout</button>
       </div>
 
       <!-- Alert Container -->
@@ -429,7 +429,7 @@
 
         <div class="search-box">
           <input type="text" id="searchInput" placeholder="Search by email, name, or phone...">
-          <button onclick="searchUsers()">Search</button>
+          <button id="searchBtn">Search</button>
         </div>
 
         <table id="usersTable">
@@ -486,7 +486,7 @@
           <option value="pending_deletion">Pending Deletion</option>
         </select>
         <div class="modal-buttons">
-          <button type="button" class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+          <button type="button" class="btn-cancel" id="cancelEditBtn">Cancel</button>
           <button type="submit" class="btn-save">Save Changes</button>
         </div>
       </form>
@@ -496,6 +496,11 @@
   <script>
     const API_BASE = '/api';
     let adminSecret = null;
+
+    // Static button event listeners
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+    document.getElementById('searchBtn').addEventListener('click', () => searchUsers());
+    document.getElementById('cancelEditBtn').addEventListener('click', closeEditModal);
 
     // Authentication
     document.getElementById('authForm').addEventListener('submit', async (e) => {
@@ -588,20 +593,33 @@
             <td>${user.qrEnabled ? '✓' : '✗'}</td>
             <td>${user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never'}</td>
             <td>
-              <button class="action-btn btn-edit" onclick="openEditModal('${user._id}')">Edit</button>
-              <button class="action-btn btn-reset" onclick="resetPassword('${user._id}')">Reset Pass</button>
-              <button class="action-btn btn-delete" onclick="deleteUser('${user._id}')">Delete</button>
+              <button class="action-btn btn-edit" data-user-id="${user._id}" data-action="edit">Edit</button>
+              <button class="action-btn btn-reset" data-user-id="${user._id}" data-action="reset">Reset Pass</button>
+              <button class="action-btn btn-delete" data-user-id="${user._id}" data-action="delete">Delete</button>
             </td>
           </tr>
         `).join('');
+
+        // Add event listeners to dynamically generated buttons
+        document.querySelectorAll('.action-btn').forEach(btn => {
+          btn.addEventListener('click', handleActionButton);
+        });
       } catch (error) {
         console.error('Error loading users:', error);
       }
     }
 
-    function searchUsers() {
-      const search = document.getElementById('searchInput').value;
-      loadUsers(1, search);
+    function handleActionButton(e) {
+      const userId = e.target.getAttribute('data-user-id');
+      const action = e.target.getAttribute('data-action');
+
+      if (action === 'edit') {
+        openEditModal(userId);
+      } else if (action === 'reset') {
+        resetPassword(userId);
+      } else if (action === 'delete') {
+        deleteUser(userId);
+      }
     }
 
     async function openEditModal(userId) {
