@@ -54,22 +54,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     */
 
-    const email = document.getElementById('email')?.value?.trim();
+    const email = document.getElementById('loginIdentifier')?.value?.trim();
     const password = document.getElementById('password')?.value;
 
     if (!email || !password) {
-      showNotification('Please fill in both email and password.', false);
+      showNotification('Please fill in both email/phone and password.', false);
       return;
     }
 
-    console.log('Attempting login with:', { email });
+    console.log('Attempting login with:', { loginIdentifier: email });
 
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          email, 
+          loginIdentifier: email, 
           password,
           recaptchaToken
         })

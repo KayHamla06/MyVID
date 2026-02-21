@@ -665,16 +665,21 @@
       try {
         const response = await fetch(`${API_BASE}/admin/users/${userId}/reset-password`, {
           method: 'POST',
-          headers: { 'X-Admin-Secret': adminSecret }
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-Admin-Secret': adminSecret 
+          }
         });
         const result = await response.json();
 
         if (response.ok) {
           showAlert(result.message, 'success');
+          loadUsers();
         } else {
-          throw new Error(result.message);
+          throw new Error(result.message || 'Failed to reset password');
         }
       } catch (error) {
+        console.error('Reset password error:', error);
         showAlert('Error: ' + error.message, 'error');
       }
     }
@@ -685,7 +690,10 @@
       try {
         const response = await fetch(`${API_BASE}/admin/users/${userId}`, {
           method: 'DELETE',
-          headers: { 'X-Admin-Secret': adminSecret }
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-Admin-Secret': adminSecret 
+          }
         });
         const result = await response.json();
 
@@ -693,9 +701,10 @@
           showAlert(result.message, 'success');
           loadUsers();
         } else {
-          throw new Error(result.message);
+          throw new Error(result.message || 'Failed to delete user');
         }
       } catch (error) {
+        console.error('Delete user error:', error);
         showAlert('Error: ' + error.message, 'error');
       }
     }

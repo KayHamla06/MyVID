@@ -78,6 +78,11 @@ const getMongoURI = () => {
  * Used for QR code generation and redirects
  */
 const getBaseURL = () => {
+  // Render deployment - use RENDER_EXTERNAL_URL
+  if (process.env.RENDER_EXTERNAL_URL) {
+    return process.env.RENDER_EXTERNAL_URL;
+  }
+
   // Production: use BASE_URL environment variable
   if (process.env.BASE_URL) {
     return process.env.BASE_URL.replace(/\/$/, ''); // Remove trailing slash

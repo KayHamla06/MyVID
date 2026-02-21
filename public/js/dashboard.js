@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const populateForms = () => {
     document.getElementById('firstName').value = profile.firstName || '';
+    document.getElementById('phoneNumber').value = profile.phoneNumber || '';
     document.getElementById('country').value = profile.country || '';
     document.getElementById('lastName').value = profile.fullDetails?.lastName || '';
     document.getElementById('address').value = profile.fullDetails?.address || '';
@@ -121,7 +122,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     e.preventDefault();
     try {
       const updates = { 
-        firstName: document.getElementById('firstName').value, 
+        firstName: document.getElementById('firstName').value,
+        phoneNumber: document.getElementById('phoneNumber').value, 
         country: document.getElementById('country').value 
       };
       const res = await fetch('/api/user/profile', { 
