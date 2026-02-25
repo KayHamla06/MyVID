@@ -20,7 +20,6 @@ const UserSchema = new mongoose.Schema({
   },
   phoneNumber: {
     type: String,
-    unique: true,
     sparse: true,
     trim: true,
     validate: {
@@ -30,6 +29,10 @@ const UserSchema = new mongoose.Schema({
       },
       message: 'Please provide a valid phone number (at least 10 digits)'
     }
+  },
+  phoneVisible: {
+    type: Boolean,
+    default: false
   },
   // Public Profile Username (for QR codes)
   username: {
@@ -65,10 +68,18 @@ const UserSchema = new mongoose.Schema({
     trim: true,
     maxlength: [50, 'First name cannot exceed 50 characters']
   },
+  firstNameVisible: {
+    type: Boolean,
+    default: true
+  },
   country: {
     type: String,
     trim: true,
     maxlength: [100, 'Country cannot exceed 100 characters']
+  },
+  countryVisible: {
+    type: Boolean,
+    default: true
   },
   profilePhoto: {
     type: String, // Cloudinary URL
@@ -90,6 +101,14 @@ const UserSchema = new mongoose.Schema({
     dob: {
       type: Date
     }
+  },
+  addressVisible: {
+    type: Boolean,
+    default: false
+  },
+  dobVisible: {
+    type: Boolean,
+    default: false
   },
 
   // Emergency Contacts
@@ -116,6 +135,10 @@ const UserSchema = new mongoose.Schema({
       default: false
     }
   }],
+  emergencyContactsVisible: {
+    type: Boolean,
+    default: false
+  },
 
   // Medical Information
   medicalAlerts: [{
@@ -203,8 +226,12 @@ UserSchema.pre('save', async function (next) {
 // Method to compare passwords
 UserSchema.methods.comparePassword = async function (candidatePassword) {
   try {
+    if (!this.password) {
+      throw new Error('User password not available');
+    }
     return await bcrypt.compare(candidatePassword, this.password);
-  } catch {
+  } catch (error) {
+    console.error('Password comparison error:', error.message);
     throw new Error('Password comparison failed');
   }
 };
@@ -282,12 +309,19 @@ UserSchema.methods.getSafeProfile = function () {
     id: this._id,
     email: this.email,
     firstName: this.firstName,
+    firstNameVisible: this.firstNameVisible,
+    phoneNumber: this.phoneNumber || null,
+    phoneVisible: this.phoneVisible,
     country: this.country,
+    countryVisible: this.countryVisible,
     profilePhoto: this.profilePhoto,
     emergencyContacts: this.emergencyContacts,
+    emergencyContactsVisible: this.emergencyContactsVisible,
     medicalAlerts: this.medicalAlerts,
     medicalNotes: this.medicalNotes,
     fullDetails: this.fullDetails,
+    addressVisible: this.addressVisible,
+    dobVisible: this.dobVisible,
     qrId: this.qrId,
     qrEnabled: this.qrEnabled,
     createdAt: this.createdAt,
@@ -297,11 +331,14 @@ UserSchema.methods.getSafeProfile = function () {
 
 // Method to get public profile data (for QR code access)
 UserSchema.methods.getPublicProfile = function () {
-  const publicContacts = this.emergencyContacts.filter(c => c.isPublic);
+  const publicContacts = this.emergencyContactsVisible ? this.emergencyContacts.filter(c => c.isPublic) : [];
 
   return {
-    firstName: this.firstName,
-    country: this.country,
+    firstName: this.firstNameVisible ? this.firstName : null,
+    country: this.countryVisible ? this.country : null,
+    phoneNumber: this.phoneVisible ? this.phoneNumber : null,
+    address: this.addressVisible && this.fullDetails ? this.fullDetails.address : null,
+    dob: this.dobVisible && this.fullDetails ? this.fullDetails.dob : null,
     profilePhoto: this.profilePhoto,
     medicalAlerts: this.medicalAlerts,
     emergencyContacts: publicContacts.map(c => ({

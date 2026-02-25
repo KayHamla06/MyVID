@@ -34,12 +34,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const populateForms = () => {
     document.getElementById('firstName').value = profile.firstName || '';
+    document.getElementById('firstNameVisible').checked = profile.firstNameVisible === true;
     document.getElementById('phoneNumber').value = profile.phoneNumber || '';
+    document.getElementById('phoneVisible').checked = profile.phoneVisible === true;
     document.getElementById('country').value = profile.country || '';
+    document.getElementById('countryVisible').checked = profile.countryVisible === true;
     document.getElementById('lastName').value = profile.fullDetails?.lastName || '';
     document.getElementById('address').value = profile.fullDetails?.address || '';
+    document.getElementById('addressVisible').checked = profile.addressVisible === true;
     document.getElementById('dob').value = profile.fullDetails?.dob ? new Date(profile.fullDetails.dob).toISOString().split('T')[0] : '';
+    document.getElementById('dobVisible').checked = profile.dobVisible === true;
     document.getElementById('medical-notes').value = profile.medicalNotes || '';
+    document.getElementById('emergencyContactsVisible').checked = profile.emergencyContactsVisible === true;
 
     // Show profile photo if exists
     if (profile.profilePhoto) {
@@ -123,8 +129,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const updates = { 
         firstName: document.getElementById('firstName').value,
-        phoneNumber: document.getElementById('phoneNumber').value, 
-        country: document.getElementById('country').value 
+        firstNameVisible: document.getElementById('firstNameVisible').checked,
+        phoneNumber: document.getElementById('phoneNumber').value.trim(),
+        phoneVisible: document.getElementById('phoneVisible').checked,
+        country: document.getElementById('country').value,
+        countryVisible: document.getElementById('countryVisible').checked
       };
       const res = await fetch('/api/user/profile', { 
         method: 'PUT', 
@@ -139,7 +148,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         showNotification('Personal info saved!');
         await fetchProfile();
       } else {
-        showNotification('Failed to save', 'error');
+        const error = await res.json();
+        showNotification(error.message || 'Failed to save', 'error');
       }
     } catch (err) {
       console.error('Save error:', err);
@@ -248,6 +258,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  // Toggle emergency contacts visibility
+  document.getElementById('emergencyContactsVisible').addEventListener('change', async (e) => {
+    try {
+      const res = await fetch('/api/user/profile', { 
+        method: 'PUT', 
+        headers: { 
+          'Content-Type': 'application/json', 
+          Authorization: `Bearer ${token}` 
+        }, 
+        body: JSON.stringify({ emergencyContactsVisible: e.target.checked }) 
+      });
+      
+      if (res.ok) {
+        showNotification('Privacy setting updated!');
+        await fetchProfile();
+      }
+    } catch (err) {
+      console.error('Update visibility error:', err);
+    }
+  });
+
   // Add alert
   document.getElementById('add-alert').addEventListener('click', async () => {
     const alert = document.getElementById('medical-alert').value.trim();
@@ -331,7 +362,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           lastName: document.getElementById('lastName').value,
           address: document.getElementById('address').value,
           dob: document.getElementById('dob').value
-        } 
+        },
+        addressVisible: document.getElementById('addressVisible').checked,
+        dobVisible: document.getElementById('dobVisible').checked
       };
       const res = await fetch('/api/user/profile', { 
         method: 'PUT', 
@@ -345,6 +378,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (res.ok) {
         showNotification('Full details saved!');
         await fetchProfile();
+      } else {
+        const error = await res.json();
+        showNotification(error.message || 'Failed to save', 'error');
       }
     } catch (err) {
       console.error('Save full details error:', err);

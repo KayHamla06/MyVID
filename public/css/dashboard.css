@@ -530,6 +530,58 @@ button {
   }
 }
 
+/* Emergency Numbers */
+.emergency-numbers-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.emergency-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: linear-gradient(135deg, #ff5722 0%, #ff7043 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: var(--radius);
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.emergency-btn:hover {
+  background: linear-gradient(135deg, #e64a19 0%, #ff5722 100%);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.emergency-btn .btn-icon {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.emergency-btn .btn-label {
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+}
+
+.emergency-btn .btn-number {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.emergency-note {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  font-style: italic;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .dashboard-grid {

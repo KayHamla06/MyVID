@@ -52,52 +52,66 @@
             <div class="form-group">
               <label for="firstName">First Name</label>
               <input type="text" id="firstName" placeholder="Enter your first name">
+              <label class="checkbox-container">
+                <input type="checkbox" id="firstNameVisible">
+                <span>Make this visible publicly</span>
+              </label>
             </div>
 
             <div class="form-group">
               <label for="phoneNumber">Phone Number</label>
               <input type="tel" id="phoneNumber" placeholder="Enter your phone number (e.g., +1234567890)">
+              <label class="checkbox-container">
+                <input type="checkbox" id="phoneVisible">
+                <span>Make this visible publicly</span>
+              </label>
             </div>
 
             <div class="form-group">
               <label for="country">Country</label>
               <input type="text" id="country" placeholder="Enter your country">
+              <label class="checkbox-container">
+                <input type="checkbox" id="countryVisible">
+                <span>Make this visible publicly</span>
+              </label>
             </div>
             
             <button type="submit" class="btn-primary">Save Personal Info</button>
           </form>
         </section>
 
-        <!-- Emergency Contacts Card -->
+        <!-- Full Details Card -->
         <section class="card">
           <div class="card-header">
-            <h3>📞 Emergency Contacts</h3>
-            <p class="header-subtitle">Add trusted people who can be reached in case of emergency</p>
+            <h3>🔒 Full Details (Private)</h3>
+            <p class="header-subtitle">These details are stored securely and never shared publicly</p>
           </div>
-          <div class="card-body">
-            <div id="contacts-list" class="list-container"></div>
-            
-            <form id="contact-form" class="add-form">
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="contact-name">Name</label>
-                  <input type="text" id="contact-name" placeholder="Contact name" required>
-                </div>
+          <form id="full-form" class="card-body">
+            <div class="form-group">
+              <label for="lastName">Last Name</label>
+              <input type="text" id="lastName" placeholder="Enter your last name">
+            </div>
 
-                <div class="form-group">
-                  <label for="contact-phone">Phone</label>
-                  <input type="tel" id="contact-phone" placeholder="Phone number" required>
-                </div>
-              </div>
-              
+            <div class="form-group">
+              <label for="address">Address</label>
+              <input type="text" id="address" placeholder="Enter your address">
               <label class="checkbox-container">
-                <input type="checkbox" id="contact-public">
-                <span>Make this contact visible publicly</span>
+                <input type="checkbox" id="addressVisible">
+                <span>Make this visible publicly</span>
               </label>
+            </div>
 
-              <button type="submit" class="btn-secondary">Add Contact</button>
-            </form>
-          </div>
+            <div class="form-group">
+              <label for="dob">Date of Birth</label>
+              <input type="date" id="dob">
+              <label class="checkbox-container">
+                <input type="checkbox" id="dobVisible">
+                <span>Make this visible publicly</span>
+              </label>
+            </div>
+
+            <button type="submit" class="btn-primary">Save Full Details</button>
+          </form>
         </section>
 
         <!-- Medical Info Card -->
@@ -126,32 +140,71 @@
           </div>
         </section>
 
-        <!-- Full Details Card -->
+        <!-- Emergency Contacts Card -->
         <section class="card">
           <div class="card-header">
-            <h3>🔒 Full Details (Private)</h3>
-            <p class="header-subtitle">These details are stored securely and never shared publicly</p>
+            <h3>📞 Emergency Contacts</h3>
+            <p class="header-subtitle">Add trusted people who can be reached in case of emergency</p>
           </div>
-          <form id="full-form" class="card-body">
-            <div class="form-group">
-              <label for="lastName">Last Name</label>
-              <input type="text" id="lastName" placeholder="Enter your last name">
-            </div>
+          <div class="card-body">
+            <div id="contacts-list" class="list-container"></div>
+            
+            <label class="checkbox-container">
+              <input type="checkbox" id="emergencyContactsVisible">
+              <span>Make emergency contacts visible publicly</span>
+            </label>
+            
+            <form id="contact-form" class="add-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="contact-name">Name</label>
+                  <input type="text" id="contact-name" placeholder="Contact name" required>
+                </div>
 
-            <div class="form-group">
-              <label for="address">Address</label>
-              <input type="text" id="address" placeholder="Enter your address">
-            </div>
+                <div class="form-group">
+                  <label for="contact-phone">Phone</label>
+                  <input type="tel" id="contact-phone" placeholder="Phone number" required>
+                </div>
+              </div>
+              
+              <label class="checkbox-container">
+                <input type="checkbox" id="contact-public">
+                <span>Make this contact visible publicly</span>
+              </label>
 
-            <div class="form-group">
-              <label for="dob">Date of Birth</label>
-              <input type="date" id="dob">
-            </div>
-
-            <button type="submit" class="btn-primary">Save Full Details</button>
-          </form>
+              <button type="submit" class="btn-secondary">Add Contact</button>
+            </form>
+          </div>
         </section>
 
+        <!-- Emergency Numbers Card -->
+        <section class="card">
+          <div class="card-header">
+            <h3>🚨 Emergency Numbers</h3>
+            <p class="header-subtitle">Quick access to emergency services</p>
+          </div>
+          <div class="card-body">
+            <div class="emergency-numbers-list">
+              <a href="tel:911" class="emergency-btn police-btn">
+                <span class="btn-icon">🚔</span>
+                <span class="btn-label">Police</span>
+                <span class="btn-number">911</span>
+              </a>
+              <a href="tel:911" class="emergency-btn ambulance-btn">
+                <span class="btn-icon">🚑</span>
+                <span class="btn-label">Ambulance</span>
+                <span class="btn-number">911</span>
+              </a>
+              <a href="tel:911" class="emergency-btn emergency-btn-main">
+                <span class="btn-icon">🆘</span>
+                <span class="btn-label">Emergency Services</span>
+                <span class="btn-number">911</span>
+              </a>
+            </div>
+            <p class="emergency-note">Note: Update numbers based on your country. US example shown.</p>
+          </div>
+        </section>
+  
       </div>
 
       <!-- Right Column -->

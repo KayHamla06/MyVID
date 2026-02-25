@@ -2,11 +2,17 @@ const express = require('express');
 const path = require('path');
 const User = require('../models/User');
 const AccessLog = require('../models/AccessLog');
+const { qrScanLimiter } = require('../middleware/Ratelimiter');
 
 const router = express.Router();
 
-// Render public profile server-side (tests expect populated HTML)
-router.get('/:qrId', async (req, res) => {
+/**
+ * @route   GET /p/:qrId
+ * @desc    Get public profile via QR code - Server-side rendered HTML
+ * @access  Public
+ * @security Rate limited (30 per minute) to prevent scanning abuse
+ */
+router.get('/:qrId', qrScanLimiter, async (req, res) => {
   try {
     const user = await User.findOne({ qrId: req.params.qrId });
 
@@ -29,10 +35,10 @@ router.get('/:qrId', async (req, res) => {
       userAgent
     });
 
-    // Build a minimal server-rendered HTML containing the public fields
-    const publicContacts = (user.emergencyContacts || []).filter(c => c.isPublic);
-    const medicalHtml = (user.medicalAlerts || []).map(a => `<li>${a}</li>`).join('');
-    const contact = publicContacts[0] ? `<a id="emergency-contact" class="call-btn">${publicContacts[0].name} - ${publicContacts[0].phone}</a>` : '';
+    // Get public profile respecting visibility flags
+    const publicProfile = user.getPublicProfile();
+    const medicalHtml = (publicProfile.medicalAlerts || []).map(a => `<li>${escapeHtml(a)}</li>`).join('');
+    const contactsHtml = (publicProfile.emergencyContacts || []).map(c => `<a href="tel:${escapeHtml(c.phone)}" class="call-btn">${escapeHtml(c.name)} - ${escapeHtml(c.phone)}</a>`).join('');
 
     const html = `<!DOCTYPE html>
       <html lang="en">
@@ -42,12 +48,14 @@ router.get('/:qrId', async (req, res) => {
         <title>Public Profile</title>
       </head>
       <body>
-        <h1>${user.firstName || ''}</h1>
-        <p>${user.country || ''}</p>
+        <h1>${publicProfile.firstName ? escapeHtml(publicProfile.firstName) : ''}</h1>
+        <p>${publicProfile.country ? escapeHtml(publicProfile.country) : ''}</p>
+        <p>${publicProfile.phoneNumber ? 'Phone: ' + escapeHtml(publicProfile.phoneNumber) : ''}</p>
+        <p>${publicProfile.address ? 'Address: ' + escapeHtml(publicProfile.address) : ''}</p>
         <h2>Medical Alerts</h2>
         <ul>${medicalHtml}</ul>
-        <h2>Emergency Contact</h2>
-        ${contact}
+        <h2>Emergency Contacts</h2>
+        ${contactsHtml}
       </body>
       </html>`;
 
@@ -57,25 +65,38 @@ router.get('/:qrId', async (req, res) => {
   }
 });
 
-// JSON endpoint for frontend if needed
-router.get('/data/:qrId', async (req, res) => {
+/**
+ * @route   GET /p/data/:qrId
+ * @desc    Get public profile data as JSON (for frontend consumption)
+ * @access  Public
+ * @security Rate limited (30 per minute) to prevent API abuse
+ * @note    All sensitive fields filtered by getPublicProfile()
+ */
+router.get('/data/:qrId', qrScanLimiter, async (req, res) => {
   try {
     const user = await User.findOne({ qrId: req.params.qrId });
     if (!user || !user.qrEnabled) {
       return res.status(404).json({ success: false, message: 'QR disabled or not found' });
     }
-    const publicContacts = user.emergencyContacts.filter(c => c.isPublic);
-    const publicData = {
-      firstName: user.firstName,
-      profilePhoto: user.profilePhoto,
-      country: user.country,
-      medicalAlerts: user.medicalAlerts,
-      emergencyContacts: publicContacts.map(c => ({ name: c.name, phone: c.phone }))
-    };
+    const publicData = user.getPublicProfile();
     res.json({ success: true, data: publicData });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });
+
+/**
+ * Escape HTML to prevent XSS
+ */
+function escapeHtml(text) {
+  if (!text) return '';
+  const str = String(text);
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
 module.exports = router;

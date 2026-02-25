@@ -1,11 +1,7 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const axios = require('axios');
-/**
- * Authentication Controller
- * Handles all authentication logic with security best practices
- */
+const config = require('../config/environment');
 
 // Generate JWT token
 const generateToken = (userId) => {
@@ -16,44 +12,302 @@ const generateToken = (userId) => {
   );
 };
 
-// ========================
-// reCAPTCHA TEMPORARILY DISABLED - EVERYWHERE (dev, staging, production)
-// ========================
-// Verify Google reCAPTCHA v3
-const verifyRecaptcha = async (token) => {
-  // reCAPTCHA verification temporarily disabled for all environments
-  // This disables bot protection in: development, staging, AND production
-  // To re-enable, uncomment the code below
-  console.warn('⚠️  reCAPTCHA verification disabled EVERYWHERE (temporarily)');
-  return true;
-  
-  /* DISABLED CODE - KEPT FOR RE-ENABLING
+/**
+ * SIGNUP
+ * Creates new user account with security validation
+ */
+exports.signup = async (req, res) => {
   try {
-    // Only verify in production
-    if (process.env.NODE_ENV !== 'production') return true;
+    const { email, password, confirmPassword, firstName, lastName } = req.body;
 
-    const response = await axios.post(
-      'https://www.google.com/recaptcha/api/siteverify',
-      null,
-      {
-        params: {
-          secret: process.env.RECAPTCHA_SECRET_KEY,
-          response: token
-        }
+    // Validate required fields
+    if (!email || !password || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email, password, and password confirmation'
+      });
+    }
+
+    // Verify passwords match
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Passwords do not match'
+      });
+    }
+
+    // Password strength validation
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 8 characters long'
+      });
+    }
+
+    // Check password complexity
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+
+    if (!hasUpperCase || !hasLowerCase || !hasNumber) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must contain uppercase, lowercase, and numbers'
+      });
+    }
+
+    // Check if user already exists (safely)
+    const existingUser = await User.findOne({ email: email.toLowerCase() }).select('_id');
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'An account with this email already exists'
+      });
+    }
+
+    // Create new user
+    const user = new User({
+      email: email.toLowerCase(),
+      password,
+      firstName: (firstName || '').trim(),
+      lastName: (lastName || '').trim()
+    });
+
+    await user.save();
+
+    // Generate token
+    const token = generateToken(user._id);
+
+    // Update last login
+    user.lastLogin = Date.now();
+    await user.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Account created successfully',
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        firstName: user.firstName
       }
-    );
+    });
 
-    // reCAPTCHA v3 returns a score between 0 and 1
-    // 0.5 is a reasonable threshold
-    return response.data.success && response.data.score >= 0.5;
   } catch (error) {
-    console.error('reCAPTCHA verification error:', error);
-    // In production, you might want to fail closed (return false)
-    // For development, you might want to fail open
-    return process.env.NODE_ENV !== 'production';
+    console.error('Signup error:', error.message);
+
+    // Handle specific MongoDB errors
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'An account with this email already exists'
+      });
+    }
+
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({
+        success: false,
+        message: messages.join('. ')
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Account creation failed. Please try again.'
+    });
   }
-  */
 };
+
+/**
+ * LOGIN
+ * Authenticates user with secure password comparison
+ */
+exports.login = async (req, res) => {
+  try {
+    const { loginIdentifier, password } = req.body;
+
+    // Validate input
+    if (!loginIdentifier || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email or phone number and password'
+      });
+    }
+
+    // Detect login type (email vs phone)
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginIdentifier);
+    const isPhone = /^[\d\s\-\+\(\)]{10,}$/.test(loginIdentifier.trim());
+
+    if (!isEmail && !isPhone) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
+
+    // Find user by email or phone - safely with password selected
+    let user;
+    try {
+      if (isEmail) {
+        user = await User.findOne({ email: loginIdentifier.toLowerCase() }).select('+password');
+      } else {
+        user = await User.findOne({ phoneNumber: loginIdentifier.trim() }).select('+password');
+      }
+    } catch (dbError) {
+      console.error('Database query error:', dbError.message);
+      return res.status(500).json({
+        success: false,
+        message: 'Authentication service temporarily unavailable'
+      });
+    }
+
+    if (!user) {
+      // Prevent user enumeration - use same message as wrong password
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
+
+    // Check if account is locked
+    if (user.isLocked) {
+      const lockTimeRemaining = Math.ceil((user.lockUntil - Date.now()) / 1000 / 60);
+      return res.status(423).json({
+        success: false,
+        message: `Account is temporarily locked. Please try again in ${lockTimeRemaining} minutes.`,
+        locked: true
+      });
+    }
+
+    // Verify password with secure comparison
+    let isPasswordValid = false;
+    try {
+      isPasswordValid = await user.comparePassword(password);
+    } catch (compareError) {
+      console.error('Password comparison error:', compareError.message);
+      return res.status(500).json({
+        success: false,
+        message: 'Authentication service temporarily unavailable'
+      });
+    }
+
+    if (!isPasswordValid) {
+      // Increment failed login attempts
+      try {
+        await user.incLoginAttempts();
+      } catch (updateError) {
+        console.error('Failed to update login attempts:', updateError.message);
+      }
+
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
+
+    // Reset login attempts on successful login
+    if (user.loginAttempts > 0) {
+      try {
+        await user.resetLoginAttempts();
+      } catch (updateError) {
+        console.error('Failed to reset login attempts:', updateError.message);
+      }
+    }
+
+    // Generate token
+    const token = generateToken(user._id);
+
+    // Update last login
+    try {
+      user.lastLogin = Date.now();
+      await user.save();
+    } catch (saveError) {
+      console.error('Failed to update last login:', saveError.message);
+    }
+
+    // Return safe user data (never expose password or sensitive fields)
+    res.json({
+      success: true,
+      message: 'Login successful',
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        firstName: user.firstName
+      }
+    });
+
+  } catch (error) {
+    console.error('Login error:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Login failed. Please try again.'
+    });
+  }
+};
+
+/**
+ * LOGOUT
+ * Not required for token-based auth, but documented
+ */
+exports.logout = (req, res) => {
+  res.json({
+    success: true,
+    message: 'Logged out successfully'
+  });
+};
+
+/**
+ * FORGOT PASSWORD
+ * Initiates password reset flow
+ */
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide your email address'
+      });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+
+    // Always return success to prevent user enumeration
+    if (!user) {
+      return res.json({
+        success: true,
+        message: 'If an account exists with this email, a password reset link will be sent'
+      });
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    user.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    user.passwordResetExpires = Date.now() + 30 * 60 * 1000; // 30 minutes
+
+    await user.save();
+
+    // Send email (implement email service)
+    console.log('[SECURITY] Password reset token generated for:', email);
+
+    res.json({
+      success: true,
+      message: 'If an account exists with this email, a password reset link will be sent'
+    });
+
+  } catch (error) {
+    console.error('Forgot password error:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Password reset request failed'
+    });
+  }
+};
+
+module.exports = exports;
 
 /**
  * SIGNUP
@@ -229,10 +483,18 @@ exports.login = async (req, res) => {
 
     // Find user by email or phone number
     let user;
-    if (isEmail) {
-      user = await User.findOne({ email: loginIdentifier.toLowerCase() });
-    } else {
-      user = await User.findOne({ phoneNumber: loginIdentifier.trim() });
+    try {
+      if (isEmail) {
+        user = await User.findOne({ email: loginIdentifier.toLowerCase() }).select('+password');
+      } else {
+        user = await User.findOne({ phoneNumber: loginIdentifier.trim() }).select('+password');
+      }
+    } catch (dbError) {
+      console.error('Database query error during login:', dbError);
+      return res.status(500).json({
+        success: false,
+        message: 'Server error. Please try again.'
+      });
     }
 
     if (!user) {
@@ -253,12 +515,26 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Verify password
-    const isPasswordValid = await user.comparePassword(password);
+    // Verify password with safe error handling
+    let isPasswordValid = false;
+    try {
+      isPasswordValid = await user.comparePassword(password);
+    } catch (compareError) {
+      console.error('Password comparison error:', compareError);
+      return res.status(500).json({
+        success: false,
+        message: 'Server error. Please try again.'
+      });
+    }
 
     if (!isPasswordValid) {
-      // Increment failed login attempts
-      await user.incLoginAttempts();
+      // Increment failed login attempts with error handling
+      try {
+        await user.incLoginAttempts();
+      } catch (updateError) {
+        console.error('Failed to update login attempts:', updateError);
+        // Don't return error here, still reject login
+      }
 
       return res.status(401).json({
         success: false,
@@ -266,17 +542,27 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Reset login attempts on successful login
+    // Reset login attempts on successful login with error handling
     if (user.loginAttempts > 0) {
-      await user.resetLoginAttempts();
+      try {
+        await user.resetLoginAttempts();
+      } catch (updateError) {
+        console.error('Failed to reset login attempts:', updateError);
+        // Continue - this is not critical
+      }
     }
 
     // Generate token
     const token = generateToken(user._id);
 
-    // Update last login
-    user.lastLogin = Date.now();
-    await user.save();
+    // Update last login with error handling
+    try {
+      user.lastLogin = Date.now();
+      await user.save();
+    } catch (saveError) {
+      console.error('Failed to update last login:', saveError);
+      // Continue - token is already generated
+    }
 
     res.json({
       success: true,
