@@ -1,8 +1,20 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  const qrId = window.location.pathname.split('/').pop();
+  const pathParts = window.location.pathname.split('/').filter(Boolean);
+  let dataUrl = null;
+
+  if (pathParts[0] === 'publicinfo' && pathParts[1]) {
+    dataUrl = `/publicinfo/${pathParts[1]}/data`;
+  } else if (pathParts[0] === 'p' && pathParts[1]) {
+    dataUrl = `/p/data/${pathParts[1]}`;
+  }
+
+  if (!dataUrl) {
+    window.location.href = '/disabled.html';
+    return;
+  }
   
   try {
-    const res = await fetch(`/p/data/${qrId}`);
+    const res = await fetch(dataUrl);
     
     if (!res.ok) {
       window.location.href = '/disabled.html';

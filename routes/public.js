@@ -35,31 +35,9 @@ router.get('/:qrId', qrScanLimiter, async (req, res) => {
       userAgent
     });
 
-    // Get public profile respecting visibility flags
-    const publicProfile = user.getPublicProfile();
-    const medicalHtml = (publicProfile.medicalAlerts || []).map(a => `<li>${escapeHtml(a)}</li>`).join('');
-    const contactsHtml = (publicProfile.emergencyContacts || []).map(c => `<a href="tel:${escapeHtml(c.phone)}" class="call-btn">${escapeHtml(c.name)} - ${escapeHtml(c.phone)}</a>`).join('');
-
-    const html = `<!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Public Profile</title>
-      </head>
-      <body>
-        <h1>${publicProfile.firstName ? escapeHtml(publicProfile.firstName) : ''}</h1>
-        <p>${publicProfile.country ? escapeHtml(publicProfile.country) : ''}</p>
-        <p>${publicProfile.phoneNumber ? 'Phone: ' + escapeHtml(publicProfile.phoneNumber) : ''}</p>
-        <p>${publicProfile.address ? 'Address: ' + escapeHtml(publicProfile.address) : ''}</p>
-        <h2>Medical Alerts</h2>
-        <ul>${medicalHtml}</ul>
-        <h2>Emergency Contacts</h2>
-        ${contactsHtml}
-      </body>
-      </html>`;
-
-    res.type('text/html').status(200).send(html);
+    res.type('text/html').status(200).sendFile(
+      path.join(__dirname, '../public/public-profile.html')
+    );
   } catch (_err) {
     res.status(500).send('Server error');
   }

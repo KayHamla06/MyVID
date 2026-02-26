@@ -37,16 +37,24 @@ exports.generateQR = async (req, res) => {
       });
     }
 
-    // Generate unique username if doesn't exist
-    if (!user.username) {
-      user.username = await generateUsername(user.firstName);
-      await user.save();
-    }
+    const regenerate = req.body && req.body.regenerate === true;
 
-    // Generate unique QR ID for backward compatibility
-    if (!user.qrId) {
+    if (regenerate) {
+      user.username = await generateUsername(user.firstName);
       user.qrId = uuidv4();
       await user.save();
+    } else {
+      // Generate unique username if doesn't exist
+      if (!user.username) {
+        user.username = await generateUsername(user.firstName);
+        await user.save();
+      }
+
+      // Generate unique QR ID for backward compatibility
+      if (!user.qrId) {
+        user.qrId = uuidv4();
+        await user.save();
+      }
     }
 
     // Generate QR code URL using username (new format)

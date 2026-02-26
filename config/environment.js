@@ -41,24 +41,17 @@ if (missingVars.length > 0) {
  * Get MongoDB URI based on environment
  * Test, Development, and Production use separate databases
  */
-const getBaseURL = () => {
-  // Production: prefer BASE_URL, otherwise fall back to safepassid.xyz
+/**
+ * Get MongoDB URI based on environment
+ * Test, Development, and Production use separate databases
+ */
+const getMongoURI = () => {
+  const baseURI = process.env.MONGO_URI;
+  let dbName = 'SafePassID_Test';
+
   if (NODE_ENV === 'production') {
-    if (process.env.BASE_URL) {
-      return process.env.BASE_URL.replace(/\/$/, ''); // Remove trailing slash
-    }
-    return 'https://safepassid.xyz';
-  }
-
-  // Non-production: allow Render preview URLs
-  if (process.env.RENDER_EXTERNAL_URL) {
-    return process.env.RENDER_EXTERNAL_URL.replace(/\/$/, '');
-  }
-
-  // Development fallback
-  const port = process.env.PORT || 3000;
-  return `http://localhost:${port}`;
-};
+    dbName = 'SafePassID_Prod';
+  } else {
     dbName = 'SafePassID_Dev';
   }
 

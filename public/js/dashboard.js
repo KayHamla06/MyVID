@@ -94,6 +94,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Update QR button text
     document.getElementById('toggle-qr').textContent = profile.qrEnabled ? 'Disable QR' : 'Enable QR';
+    const viewPublicBtn = document.getElementById('view-public-profile');
+    if (viewPublicBtn) {
+      viewPublicBtn.disabled = !profile.qrEnabled;
+      viewPublicBtn.title = profile.qrEnabled
+        ? 'Open your public profile'
+        : 'Enable QR to view your public profile';
+    }
     
     // If QR exists, load it
     if (profile.qrId) {
@@ -391,9 +398,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Generate QR
   document.getElementById('generate-qr').addEventListener('click', async () => {
     try {
+      const regenerate = Boolean(profile.qrId);
       const res = await fetch('/api/user/qr/generate', { 
         method: 'POST', 
-        headers: { Authorization: `Bearer ${token}` } 
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ regenerate })
       });
       const data = await res.json();
       
@@ -409,6 +421,31 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     } catch (err) {
       console.error('QR generation error:', err);
+      showNotification('Network error', 'error');
+    }
+  });
+
+  // View public profile
+  document.getElementById('view-public-profile').addEventListener('click', async () => {
+    if (!profile.qrEnabled) {
+      showNotification('Enable QR to view your public profile', 'error');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/user/qr/generate', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      if (data.success && data.publicUrl) {
+        window.open(data.publicUrl, '_blank', 'noopener');
+      } else {
+        showNotification(data.message || 'Unable to open public profile', 'error');
+      }
+    } catch (err) {
+      console.error('View public profile error:', err);
       showNotification('Network error', 'error');
     }
   });

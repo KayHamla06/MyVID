@@ -69,87 +69,46 @@ router.get('/:username', qrScanLimiter, async (req, res) => {
       // Continue even if logging fails
     }
 
-    // Get public profile data respecting visibility flags
-    const publicProfile = user.getPublicProfile();
-
-    // Build HTML based on what's visible
-    const medicalHtml = (publicProfile.medicalAlerts || [])
-      .map(alert => `<li class="medical-alert">${escapeHtml(alert)}</li>`)
-      .join('');
-
-    const contactsHtml = (publicProfile.emergencyContacts || [])
-      .map(c => `<a href="tel:${escapeHtml(c.phone)}" class="contact-btn">${escapeHtml(c.name)} - ${escapeHtml(c.phone)}</a>`)
-      .join('');
-
-    const emergencyNumbersHtml = `
-      <div class="emergency-numbers">
-        <a href="tel:911" class="emergency-link">🚔 Police: 911</a>
-        <a href="tel:911" class="emergency-link">🚑 Ambulance: 911</a>
-        <a href="tel:911" class="emergency-link">🆘 Emergency Services: 911</a>
-      </div>`;
-
-    const photoHtml = publicProfile.profilePhoto 
-      ? `<img src="${escapeHtml(publicProfile.profilePhoto)}" alt="Profile Photo" class="profile-photo">` 
-      : '';
-
-    // Build conditional sections based on visibility
-    const phoneHtml = publicProfile.phoneNumber ? `<p class="contact-info">📱 ${escapeHtml(publicProfile.phoneNumber)}</p>` : '';
-    const addressHtml = publicProfile.address ? `<p class="contact-info">📍 ${escapeHtml(publicProfile.address)}</p>` : '';
-    const dobHtml = publicProfile.dob ? `<p class="contact-info">📅 ${escapeHtml(new Date(publicProfile.dob).toLocaleDateString())}</p>` : '';
-
-    const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${escapeHtml(publicProfile.firstName || 'SafePass')} - Emergency Info</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 20px; }
-    .container { max-width: 400px; margin: 0 auto; background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .profile-photo { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; display: block; margin: 0 auto 16px; }
-    h1 { text-align: center; color: #333; margin-bottom: 8px; }
-    .country { text-align: center; color: #666; margin-bottom: 24px; }
-    .contact-info { color: #666; margin: 8px 0; font-size: 0.95rem; }
-    h2 { color: #d32f2f; font-size: 16px; margin: 16px 0 8px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
-    .medical-alert { background: #ffebee; padding: 8px 12px; border-radius: 6px; margin: 8px 0; color: #c62828; list-style: none; }
-    .contact-btn { display: block; background: #4caf50; color: white; padding: 12px 16px; border-radius: 8px; text-decoration: none; text-align: center; margin: 8px 0; font-weight: 500; }
-    .contact-btn:hover { background: #43a047; }
-    .emergency-numbers { margin: 16px 0; }
-    .emergency-link { display: block; background: #ff5722; color: white; padding: 10px 14px; border-radius: 6px; text-decoration: none; text-align: center; margin: 6px 0; font-weight: 500; }
-    .emergency-link:hover { background: #e64a19; }
-    .footer { text-align: center; margin-top: 24px; color: #999; font-size: 12px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    ${photoHtml}
-    ${publicProfile.firstName ? `<h1>${escapeHtml(publicProfile.firstName)}</h1>` : ''}
-    ${publicProfile.country ? `<p class="country">${escapeHtml(publicProfile.country)}</p>` : ''}
-    
-    ${phoneHtml}
-    ${addressHtml}
-    ${dobHtml}
-    
-    ${medicalHtml ? `<h2>⚠️ Medical Alerts</h2><ul>${medicalHtml}</ul>` : ''}
-    
-    ${contactsHtml ? `<h2>📞 Emergency Contacts</h2>${contactsHtml}` : ''}
-    
-    <h2>🚨 Emergency Numbers</h2>
-    ${emergencyNumbersHtml}
-    
-    <p class="footer">Powered by SafePass ID</p>
-  </div>
-</body>
-</html>`;
-
-    res.type('text/html').status(200).send(html);
+    res.type('text/html').status(200).sendFile(
+      path.join(__dirname, '../public/public-profile.html')
+    );
 
   } catch (error) {
     console.error('Public profile error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error. Please try again later.'
+    });
+  }
+});
+
+/**
+ * @route   GET /publicinfo/:username/data
+ * @desc    Get public profile data as JSON (for frontend rendering)
+ * @access  Public
+ */
+router.get('/:username/data', qrScanLimiter, async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    const user = await User.findOne({
+      username: username.toLowerCase()
+    });
+
+    if (!user || !user.qrEnabled) {
+      return res.status(404).json({
+        success: false,
+        message: 'Profile not found'
+      });
+    }
+
+    const publicData = user.getPublicProfile();
+    res.json({ success: true, data: publicData });
+  } catch (error) {
+    console.error('Public profile data error:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching profile'
     });
   }
 });
