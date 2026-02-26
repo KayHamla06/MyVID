@@ -87,12 +87,16 @@ const UserSchema = new mongoose.Schema({
   },
 
   // Full Details (Private - for password recovery)
+  lastName: {
+    type: String,
+    trim: true,
+    maxlength: [50, 'Last name cannot exceed 50 characters']
+  },
+  lastNameVisible: {
+    type: Boolean,
+    default: true
+  },
   fullDetails: {
-    lastName: {
-      type: String,
-      trim: true,
-      maxlength: [50, 'Last name cannot exceed 50 characters']
-    },
     address: {
       type: String,
       trim: true,
@@ -146,10 +150,18 @@ const UserSchema = new mongoose.Schema({
     trim: true,
     maxlength: [200, 'Medical alert cannot exceed 200 characters']
   }],
+  medicalAlertsVisible: {
+    type: Boolean,
+    default: false
+  },
   medicalNotes: {
     type: String,
     trim: true,
     maxlength: [1000, 'Medical notes cannot exceed 1000 characters']
+  },
+  medicalNotesVisible: {
+    type: Boolean,
+    default: false
   },
 
   // QR Code Configuration
@@ -330,22 +342,33 @@ UserSchema.methods.getSafeProfile = function () {
 };
 
 // Method to get public profile data (for QR code access)
+// ENFORCES server-side visibility filtering - backend truth
 UserSchema.methods.getPublicProfile = function () {
-  const publicContacts = this.emergencyContactsVisible ? this.emergencyContacts.filter(c => c.isPublic) : [];
-
-  return {
+  // Only include fields marked as visible
+  const publicData = {
     firstName: this.firstNameVisible ? this.firstName : null,
+    lastName: this.lastNameVisible && this.fullDetails ? this.fullDetails.lastName : null,
     country: this.countryVisible ? this.country : null,
     phoneNumber: this.phoneVisible ? this.phoneNumber : null,
     address: this.addressVisible && this.fullDetails ? this.fullDetails.address : null,
-    dob: this.dobVisible && this.fullDetails ? this.fullDetails.dob : null,
     profilePhoto: this.profilePhoto,
-    medicalAlerts: this.medicalAlerts,
-    emergencyContacts: publicContacts.map(c => ({
-      name: c.name,
-      phone: c.phone
-    }))
+    emergencyContacts: this.emergencyContactsVisible 
+      ? this.emergencyContacts.filter(c => c.isPublic).map(c => ({
+        name: c.name,
+        phone: c.phone
+      }))
+      : [],
+    medicalAlerts: this.medicalAlertsVisible ? this.medicalAlerts : [],
+    medicalNotes: this.medicalNotesVisible ? this.medicalNotes : null
   };
+
+  // Remove null/empty fields to keep JSON clean
+  return Object.entries(publicData).reduce((acc, [key, value]) => {
+    if (value !== null && value !== undefined && (Array.isArray(value) ? value.length > 0 : true)) {
+      acc[key] = value;
+    }
+    return acc;
+  }, {});
 };
 
 // Method to log QR access

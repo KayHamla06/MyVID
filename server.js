@@ -66,6 +66,17 @@ app.use('/api/', ensureConnection);
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Favicon handler (explicitly serve favicon.ico)
+app.get('/favicon.ico', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'favicon.ico'), { 
+    maxAge: '1d',
+    headers: { 'Cache-Control': 'public, max-age=86400' }
+  }).on('error', () => {
+    // If favicon doesn't exist, send 204 (no content) instead of error
+    res.status(204).end();
+  });
+});
+
 // API Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Shield background -->
+  <path d="M50 10 L80 25 L80 50 C80 75 50 90 50 90 C50 90 20 75 20 50 L20 25 Z" fill="#1f2937" stroke="#1f2937" stroke-width="1"/>
+  <!-- Inner shield -->
+  <path d="M50 15 L77 28 L77 50 C77 72 50 85 50 85 C50 85 23 72 23 50 L23 28 Z" fill="#374151" stroke="#374151" stroke-width="1"/>
+  <!-- Safe checkmark -->
+  <path d="M40 50 L45 58 L62 40" fill="none" stroke="#10b981" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

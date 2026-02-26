@@ -3,12 +3,14 @@ const config = require('../config/environment');
 
 /**
  * Build public profile URL for QR code
- * Format: https://www.safepassid.co.za/publicinfo/profile_username
+ * PRODUCTION: Always uses https://safepassid.xyz
+ * DEVELOPMENT: Uses localhost or BASE_URL env var
  * @param {string} username - User's unique username
  * @returns {string} - Full public profile URL
  */
 exports.buildPublicUrl = (username) => {
-  const baseUrl = config.baseURL.replace(/\/$/, ''); // Remove trailing slash
+  // Use environment-aware BASE_URL (production always safepassid.xyz)
+  const baseUrl = config.baseURL.replace(/\/$/, ''); // Remove trailing slash if present
   return `${baseUrl}/publicinfo/${username}`;
 };
 

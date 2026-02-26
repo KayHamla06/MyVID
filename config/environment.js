@@ -67,24 +67,20 @@ const getMongoURI = () => {
 /**
  * Get base URL for the application
  * Used for QR code generation and redirects
+ * PRODUCTION: Enforces safepassid.xyz domain
  */
 const getBaseURL = () => {
-  // Render deployment - use RENDER_EXTERNAL_URL
-  if (process.env.RENDER_EXTERNAL_URL) {
-    return process.env.RENDER_EXTERNAL_URL;
-  }
-
-  // Production: use BASE_URL environment variable or production default
-  if (process.env.BASE_URL) {
-    return process.env.BASE_URL.replace(/\/$/, ''); // Remove trailing slash
-  }
-
-  // Production default - use safepassid.xyz domain
+  // ===== PRODUCTION: ALWAYS USE safepassid.xyz =====
   if (NODE_ENV === 'production') {
     return 'https://safepassid.xyz';
   }
 
-  // Development fallback
+  // ===== DEVELOPMENT: Allow localhost or custom domain =====
+  if (process.env.BASE_URL) {
+    return process.env.BASE_URL.replace(/\/$/, ''); // Remove trailing slash
+  }
+
+  // Development fallback - localhost
   const port = process.env.PORT || 3000;
   return `http://localhost:${port}`;
 };
