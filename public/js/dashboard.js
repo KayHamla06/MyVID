@@ -39,12 +39,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('phoneVisible').checked = profile.phoneVisible === true;
     document.getElementById('country').value = profile.country || '';
     document.getElementById('countryVisible').checked = profile.countryVisible === true;
-    document.getElementById('lastName').value = profile.fullDetails?.lastName || '';
+    document.getElementById('lastName').value = profile.lastName || '';
+    document.getElementById('lastNameVisible').checked = profile.lastNameVisible === true;
     document.getElementById('address').value = profile.fullDetails?.address || '';
     document.getElementById('addressVisible').checked = profile.addressVisible === true;
     document.getElementById('dob').value = profile.fullDetails?.dob ? new Date(profile.fullDetails.dob).toISOString().split('T')[0] : '';
     document.getElementById('dobVisible').checked = profile.dobVisible === true;
     document.getElementById('medical-notes').value = profile.medicalNotes || '';
+    if (document.getElementById('medicalAlertsVisible')) {
+      document.getElementById('medicalAlertsVisible').checked = profile.medicalAlertsVisible === true;
+    }
+    if (document.getElementById('medicalNotesVisible')) {
+      document.getElementById('medicalNotesVisible').checked = profile.medicalNotesVisible === true;
+    }
     document.getElementById('emergencyContactsVisible').checked = profile.emergencyContactsVisible === true;
 
     // Show profile photo if exists
@@ -340,7 +347,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('medical-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     try {
-      const updates = { medicalNotes: document.getElementById('medical-notes').value };
+      const updates = { 
+        medicalNotes: document.getElementById('medical-notes').value,
+        medicalAlertsVisible: document.getElementById('medicalAlertsVisible') ? document.getElementById('medicalAlertsVisible').checked : false,
+        medicalNotesVisible: document.getElementById('medicalNotesVisible') ? document.getElementById('medicalNotesVisible').checked : false
+      };
       const res = await fetch('/api/user/profile', { 
         method: 'PUT', 
         headers: { 
@@ -365,8 +376,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     e.preventDefault();
     try {
       const updates = { 
+        lastName: document.getElementById('lastName').value,
+        lastNameVisible: document.getElementById('lastNameVisible').checked,
         fullDetails: {
-          lastName: document.getElementById('lastName').value,
           address: document.getElementById('address').value,
           dob: document.getElementById('dob').value
         },

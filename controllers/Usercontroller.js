@@ -43,6 +43,8 @@ exports.updateProfile = async (req, res) => {
     const allowedFields = [
       'firstName',
       'firstNameVisible',
+      'lastName',
+      'lastNameVisible',
       'phoneNumber',
       'phoneVisible',
       'country',
@@ -50,7 +52,9 @@ exports.updateProfile = async (req, res) => {
       'emergencyContacts',
       'emergencyContactsVisible',
       'medicalAlerts',
+      'medicalAlertsVisible',
       'medicalNotes',
+      'medicalNotesVisible',
       'fullDetails',
       'addressVisible',
       'dobVisible'

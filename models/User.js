@@ -347,10 +347,11 @@ UserSchema.methods.getPublicProfile = function () {
   // Only include fields marked as visible
   const publicData = {
     firstName: this.firstNameVisible ? this.firstName : null,
-    lastName: this.lastNameVisible && this.fullDetails ? this.fullDetails.lastName : null,
+    lastName: this.lastNameVisible ? this.lastName : null,
     country: this.countryVisible ? this.country : null,
     phoneNumber: this.phoneVisible ? this.phoneNumber : null,
     address: this.addressVisible && this.fullDetails ? this.fullDetails.address : null,
+    dob: this.dobVisible && this.fullDetails ? this.fullDetails.dob : null,
     profilePhoto: this.profilePhoto,
     emergencyContacts: this.emergencyContactsVisible 
       ? this.emergencyContacts.filter(c => c.isPublic).map(c => ({
