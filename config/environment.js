@@ -41,26 +41,24 @@ if (missingVars.length > 0) {
  * Get MongoDB URI based on environment
  * Test, Development, and Production use separate databases
  */
-const getMongoURI = () => {
-  const baseURI = process.env.MONGO_URI;
-
-  if (!baseURI) {
-    throw new Error('MONGO_URI environment variable is required');
+const getBaseURL = () => {
+  // Production: prefer BASE_URL, otherwise fall back to safepassid.xyz
+  if (NODE_ENV === 'production') {
+    if (process.env.BASE_URL) {
+      return process.env.BASE_URL.replace(/\/$/, ''); // Remove trailing slash
+    }
+    return 'https://safepassid.xyz';
   }
 
-  // Determine database name based on environment
-  let dbName;
-  switch (NODE_ENV) {
-  case 'test':
-    dbName = process.env.MONGO_TEST_DB || 'SafePassID_Test';
-    break;
-  case 'development':
-    dbName = process.env.MONGO_DEV_DB || 'SafePassID_Dev';
-    break;
-  case 'production':
-    dbName = process.env.MONGO_PROD_DB || 'SafePassID';
-    break;
-  default:
+  // Non-production: allow Render preview URLs
+  if (process.env.RENDER_EXTERNAL_URL) {
+    return process.env.RENDER_EXTERNAL_URL.replace(/\/$/, '');
+  }
+
+  // Development fallback
+  const port = process.env.PORT || 3000;
+  return `http://localhost:${port}`;
+};
     dbName = 'SafePassID_Dev';
   }
 
