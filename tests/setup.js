@@ -3,7 +3,7 @@
  * Configures Jest and database for testing
  */
 
-const { connectDB, disconnectDB, clearDatabase } = require('../config/database');
+const { connectDB, disconnectDB, clearDatabase } = require('../config/Database');
 let mongod;
 // If running tests, prefer an in-memory MongoDB to avoid external dependencies
 if (process.env.NODE_ENV === 'test') {
