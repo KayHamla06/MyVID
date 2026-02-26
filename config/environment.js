@@ -83,9 +83,14 @@ const getBaseURL = () => {
     return process.env.RENDER_EXTERNAL_URL;
   }
 
-  // Production: use BASE_URL environment variable
+  // Production: use BASE_URL environment variable or production default
   if (process.env.BASE_URL) {
     return process.env.BASE_URL.replace(/\/$/, ''); // Remove trailing slash
+  }
+
+  // Production default - use safepassid.xyz domain
+  if (NODE_ENV === 'production') {
+    return 'https://safepassid.xyz';
   }
 
   // Development fallback

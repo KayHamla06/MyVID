@@ -1,31 +1,66 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const qrId = window.location.pathname.split('/').pop();
-  const res = await fetch(`/p/data/${qrId}`);
-  if (res.ok) {
+  
+  try {
+    const res = await fetch(`/p/data/${qrId}`);
+    
+    if (!res.ok) {
+      window.location.href = '/disabled.html';
+      return;
+    }
+    
     const { data } = await res.json();
-    if (data.profilePhoto) document.getElementById('profile-photo').src = data.profilePhoto;
+    
+    // Set profile photo
+    if (data.profilePhoto) {
+      document.getElementById('profile-photo').src = data.profilePhoto;
+    } else {
+      document.getElementById('profile-photo').style.display = 'none';
+    }
+    
+    // Set name
     document.getElementById('first-name').textContent = data.firstName || 'Unknown';
-    document.getElementById('country').textContent = `Country: ${data.country || 'N/A'}`;
+    document.getElementById('last-name').textContent = data.lastName || '';
+    
+    // Set country
+    document.getElementById('country').textContent = data.country || 'Country not specified';
+    
+    // Populate medical alerts
     const alertsDiv = document.getElementById('medical-alerts');
-    data.medicalAlerts.forEach(alert => {
-      const span = document.createElement('span');
-      span.className = 'alert';
-      span.textContent = alert;
-      alertsDiv.appendChild(span);
-    });
-        const contactsDiv = document.getElementById('emergency-contacts');
-    if (data.emergencyContacts && data.emergencyContacts.length > 0) {
-      data.emergencyContacts.forEach(contact => {
-        const a = document.createElement('a');
-        a.href = `tel:${contact.phone}`;
-        a.className = 'call-btn';
-        a.textContent = `Call ${contact.name}`;
-        contactsDiv.appendChild(a);
+    if (data.medicalAlerts && data.medicalAlerts.length > 0) {
+      alertsDiv.innerHTML = '';
+      data.medicalAlerts.forEach(alert => {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert';
+        alertDiv.innerHTML = `
+          <span class="alert-icon">⚠️</span>
+          <span>${alert}</span>
+        `;
+        alertsDiv.appendChild(alertDiv);
       });
     } else {
-      contactsDiv.style.display = 'none';
+      alertsDiv.innerHTML = '<div class="empty-state">No medical alerts specified</div>';
     }
-  } else {
-    window.location.href = '/disabled.html'; // Fallback
+    
+    // Populate emergency contacts
+    const contactsDiv = document.getElementById('emergency-contacts');
+    const contactsSection = document.getElementById('emergency-contacts-section');
+    
+    if (data.emergencyContacts && data.emergencyContacts.length > 0) {
+      contactsDiv.innerHTML = '';
+      data.emergencyContacts.forEach(contact => {
+        const contactLink = document.createElement('a');
+        contactLink.href = `tel:${contact.phone}`;
+        contactLink.className = 'call-btn';
+        contactLink.innerHTML = `📞 Call ${contact.name} - ${contact.phone}`;
+        contactsDiv.appendChild(contactLink);
+      });
+    } else {
+      contactsSection.style.display = 'none';
+    }
+    
+  } catch (error) {
+    console.error('Error loading profile:', error);
+    window.location.href = '/disabled.html';
   }
 });

@@ -9,34 +9,93 @@
 </head>
 <body>
   <div class="container">
-    <img id="profile-photo" alt="Profile Photo">
-
-    <h1 id="first-name">First Name</h1>
-    <p id="country">Country of Residence</p>
-
-    <h2>Medical Alerts</h2>
-    <div id="medical-alerts"></div>
-
-    <h2>Emergency Contact</h2>
-    <a id="emergency-contact" class="call-btn">Call Contact</a>
-
-    <h2>🚨 Emergency Numbers</h2>
-    <div class="emergency-numbers">
-      <a href="tel:911" class="emergency-link">🚔 Police: 911</a>
-      <a href="tel:911" class="emergency-link">🚑 Ambulance: 911</a>
-      <a href="tel:911" class="emergency-link">🆘 Emergency Services: 911</a>
+    <!-- Profile Header with Gradient -->
+    <div class="profile-header">
+      <div class="emergency-badge">🚨 EMERGENCY PROFILE</div>
+      <img id="profile-photo" src="/assets/default-avatar.png" alt="Profile Photo">
+      <h1><span id="first-name">First Name</span> <span id="last-name">Last Name</span></h1>
+      <p id="country">Country of Residence</p>
     </div>
 
-    <p class="disclaimer">
-      This profile is for emergency assistance only.  
-      Information shown here is limited to what the owner has chosen to share.  
-    </p>
-  
+    <!-- Profile Content -->
+    <div class="profile-content">
+      
+      <!-- Medical Alerts Section -->
+      <div class="profile-section">
+        <div class="section-header">
+          <span class="section-icon">⚕️</span>
+          <h2>Medical Alerts</h2>
+        </div>
+        <div id="medical-alerts" class="medical-alerts-container"></div>
+      </div>
 
+      <!-- Emergency Contacts Section -->
+      <div class="profile-section" id="emergency-contacts-section">
+        <div class="section-header">
+          <span class="section-icon">👤</span>
+          <h2>Emergency Contacts</h2>
+        </div>
+        <div id="emergency-contacts" class="emergency-contacts-container"></div>
+      </div>
+
+      <!-- Emergency Services Section -->
+      <div class="profile-section emergency-section">
+        <div class="section-header">
+          <span class="section-icon">🚨</span>
+          <h2>Emergency Services</h2>
+        </div>
+        <div class="emergency-numbers">
+          <a href="tel:10111" class="emergency-btn police-btn">
+            <span class="btn-icon">🚔</span>
+            <div class="btn-content">
+              <span class="btn-label">Emergency Police</span>
+              <span class="btn-number">10111</span>
+            </div>
+          </a>
+          <a href="tel:082911" class="emergency-btn ambulance-btn">
+            <span class="btn-icon">🚑</span>
+            <div class="btn-content">
+              <span class="btn-label">Netcare Medical</span>
+              <span class="btn-number">082 911</span>
+            </div>
+          </a>
+          <a href="tel:10177" class="emergency-btn ambulance-btn">
+            <span class="btn-icon">🚑</span>
+            <div class="btn-content">
+              <span class="btn-label">Ambulance</span>
+              <span class="btn-number">10177</span>
+            </div>
+          </a>
+          <a href="tel:084124" class="emergency-btn emergency-btn-main">
+            <span class="btn-icon">🚨</span>
+            <div class="btn-content">
+              <span class="btn-label">ER24 Emergency</span>
+              <span class="btn-number">084 124</span>
+            </div>
+          </a>
+          <a href="tel:10177" class="emergency-btn fire-btn">
+            <span class="btn-icon">🚒</span>
+            <div class="btn-content">
+              <span class="btn-label">Fire Brigade</span>
+              <span class="btn-number">10177</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Disclaimer -->
+      <div class="disclaimer">
+        <p>🛡️ <strong>Emergency Access Only</strong></p>
+        <p>Information shown is limited to what the owner has chosen to share for emergency situations.</p>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
     <footer>
-        &copy; 2026 SafePass ID. All rights reserved.  
-        <p class="footer-note">You are safe. You are seen. You are not alone.</p>
-      </footer>
+      <p>&copy; 2026 SafePass ID. All rights reserved.</p>
+      <p class="footer-note">💙 You are safe. You are seen. You are not alone.</p>
+    </footer>
   </div>
   <script src="js/public-profile.js"></script>
 </body>
