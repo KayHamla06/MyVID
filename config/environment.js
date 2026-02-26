@@ -50,7 +50,7 @@ const getMongoURI = () => {
   let dbName = 'SafePassID_Test';
 
   if (NODE_ENV === 'production') {
-    dbName = 'SafePassID_Prod';
+    dbName = 'SafePassID';
   } else {
     dbName = 'SafePassID_Dev';
   }
