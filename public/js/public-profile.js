@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Set country
     document.getElementById('country').textContent = data.country || 'Country not specified';
     
+    document.getElementById('emergency-contacts').textContent = data.emergencyContacts && data.emergencyContacts.length > 0 ? '' : '<div class="empty-state">No emergency contacts specified</div>';
     // Populate medical alerts
     const alertsDiv = document.getElementById('medical-alerts');
     if (data.medicalAlerts && data.medicalAlerts.length > 0) {
@@ -55,7 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     // Populate emergency contacts
-    const contactsDiv = document.getElementById('emergency-contacts');
+    const contactsDiv = document.getElementById('emergency-contacts').textContent = data.emergencyContacts && data.emergencyContacts.length > 0 ? '' : '<div class="empty-state">No emergency contacts specified</div>';
     const contactsSection = document.getElementById('emergency-contacts-section');
     
     if (data.emergencyContacts && data.emergencyContacts.length > 0) {
