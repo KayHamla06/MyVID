@@ -569,6 +569,30 @@ footer p {
   background-size: 1000px 100%;
 }
 
+/* Address Display */
+.address-display-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.address-block {
+  padding: 1rem;
+  background: var(--color-bg);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  line-height: 1.8;
+  color: var(--color-text);
+  font-size: 0.95rem;
+}
+
+.address-block strong {
+  display: block;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
 /* Print Styles */
 @media print {
   body {

@@ -1,0 +1,108 @@
+/* Contact Page Styles */
+
+.header-nav {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.header-nav a {
+  color: rgb(5, 5, 5);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.header-nav a:hover,
+.header-nav a.active {
+  background: var(--color-primary);
+}
+
+.faq-item {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.faq-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.faq-item h4 {
+  color: var(--color-primary);
+  margin-bottom: 0.8rem;
+  font-size: 1.1rem;
+}
+
+.faq-item p {
+  color: var(--color-text-light);
+  line-height: 1.6;
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.contact-item {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  padding: 1.5rem;
+  background: var(--color-background);
+  border-radius: 8px;
+  border-left: 4px solid var(--color-primary);
+}
+
+.contact-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.contact-details {
+  flex: 1;
+}
+
+.contact-details h4 {
+  font-size: 1.2rem;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+}
+
+.contact-details p {
+  color: var(--color-text-light);
+  margin-bottom: 0.5rem;
+}
+
+.contact-details a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.contact-details a:hover {
+  text-decoration: underline;
+}
+
+.contact-note {
+  font-size: 0.9rem;
+  color: var(--color-secondary);
+  font-style: italic;
+  margin-top: 0.5rem !important;
+}
+
+.whatsapp-btn {
+  margin-top: 10px;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.email-btn {
+  display: inline-block;
+  text-decoration: none;
+  margin-bottom: 0.5rem;
+}

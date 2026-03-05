@@ -37,7 +37,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Set country
     document.getElementById('country').textContent = data.country || 'Country not specified';
     
-    document.getElementById('emergency-contacts').textContent = data.emergencyContacts && data.emergencyContacts.length > 0 ? '' : '<div class="empty-state">No emergency contacts specified</div>';
+    // Display Address if visible
+    const addressSection = document.getElementById('address-section');
+    const addressDisplay = document.getElementById('address-display');
+    const hasAddressData = data.houseNumber || data.streetName || data.suburb || data.town || data.postalCode || data.province;
+    
+    if (hasAddressData) {
+      addressDisplay.innerHTML = '';
+      const addressParts = [];
+      
+      if (data.houseNumber) addressParts.push(data.houseNumber);
+      if (data.streetName) addressParts.push(data.streetName);
+      if (data.suburb) addressParts.push(data.suburb);
+      if (data.town) addressParts.push(data.town);
+      if (data.postalCode) addressParts.push(data.postalCode);
+      if (data.province) addressParts.push(data.province);
+      
+      if (addressParts.length > 0) {
+        const addressDiv = document.createElement('div');
+        addressDiv.className = 'address-block';
+        addressDiv.innerHTML = addressParts.join(', ');
+        addressDisplay.appendChild(addressDiv);
+      } else {
+        addressSection.style.display = 'none';
+      }
+    } else {
+      addressSection.style.display = 'none';
+    }
+    
     // Populate medical alerts
     const alertsDiv = document.getElementById('medical-alerts');
     if (data.medicalAlerts && data.medicalAlerts.length > 0) {
@@ -56,7 +83,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     // Populate emergency contacts
-    const contactsDiv = document.getElementById('emergency-contacts').textContent = data.emergencyContacts && data.emergencyContacts.length > 0 ? '' : '<div class="empty-state">No emergency contacts specified</div>';
+    const contactsDiv = document.getElementById('emergency-contacts');
     const contactsSection = document.getElementById('emergency-contacts-section');
     
     if (data.emergencyContacts && data.emergencyContacts.length > 0) {

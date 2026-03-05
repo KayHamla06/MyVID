@@ -84,6 +84,8 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/p', require('./routes/public'));
 app.use('/publicinfo', require('./routes/publicinfo'));
 app.use('/api/health', require('./routes/health'));
+app.use('/whatsapp', require('./routes/whatsapp'));
+app.use('/email', require('./routes/email'));
 
 // Serve HTML pages with proper error handling
 app.get('/', (req, res) => {

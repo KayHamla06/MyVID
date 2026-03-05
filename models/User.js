@@ -96,21 +96,66 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  fullDetails: {
-    address: {
-      type: String,
-      trim: true,
-      maxlength: [200, 'Address cannot exceed 200 characters']
-    },
-    dob: {
-      type: Date
-    }
+  // Address Fields (Individual)
+  houseNumber: {
+    type: String,
+    trim: true,
+    maxlength: [20, 'House number cannot exceed 20 characters']
   },
-  addressVisible: {
+  houseNumberVisible: {
     type: Boolean,
     default: false
   },
-  dobVisible: {
+  streetName: {
+    type: String,
+    trim: true,
+    maxlength: [100, 'Street name cannot exceed 100 characters']
+  },
+  streetNameVisible: {
+    type: Boolean,
+    default: false
+  },
+  suburb: {
+    type: String,
+    trim: true,
+    maxlength: [100, 'Suburb cannot exceed 100 characters']
+  },
+  suburbVisible: {
+    type: Boolean,
+    default: false
+  },
+  town: {
+    type: String,
+    trim: true,
+    maxlength: [100, 'Town cannot exceed 100 characters']
+  },
+  townVisible: {
+    type: Boolean,
+    default: false
+  },
+  postalCode: {
+    type: String,
+    trim: true,
+    maxlength: [20, 'Postal code cannot exceed 20 characters']
+  },
+  postalCodeVisible: {
+    type: Boolean,
+    default: false
+  },
+  province: {
+    type: String,
+    trim: true,
+    maxlength: [100, 'Province cannot exceed 100 characters']
+  },
+  provinceVisible: {
+    type: Boolean,
+    default: false
+  },
+  // Date of Birth
+  dateOfBirth: {
+    type: Date
+  },
+  dateOfBirthVisible: {
     type: Boolean,
     default: false
   },
@@ -329,15 +374,26 @@ UserSchema.methods.getSafeProfile = function () {
     country: this.country,
     countryVisible: this.countryVisible,
     profilePhoto: this.profilePhoto,
+    houseNumber: this.houseNumber,
+    houseNumberVisible: this.houseNumberVisible,
+    streetName: this.streetName,
+    streetNameVisible: this.streetNameVisible,
+    suburb: this.suburb,
+    suburbVisible: this.suburbVisible,
+    town: this.town,
+    townVisible: this.townVisible,
+    postalCode: this.postalCode,
+    postalCodeVisible: this.postalCodeVisible,
+    province: this.province,
+    provinceVisible: this.provinceVisible,
+    dateOfBirth: this.dateOfBirth,
+    dateOfBirthVisible: this.dateOfBirthVisible,
     emergencyContacts: this.emergencyContacts,
     emergencyContactsVisible: this.emergencyContactsVisible,
     medicalAlerts: this.medicalAlerts,
     medicalAlertsVisible: this.medicalAlertsVisible,
     medicalNotes: this.medicalNotes,
     medicalNotesVisible: this.medicalNotesVisible,
-    fullDetails: this.fullDetails,
-    addressVisible: this.addressVisible,
-    dobVisible: this.dobVisible,
     qrId: this.qrId,
     qrEnabled: this.qrEnabled,
     createdAt: this.createdAt,
@@ -354,8 +410,13 @@ UserSchema.methods.getPublicProfile = function () {
     lastName: this.lastNameVisible ? this.lastName : null,
     country: this.countryVisible ? this.country : null,
     phoneNumber: this.phoneVisible ? this.phoneNumber : null,
-    address: this.addressVisible && this.fullDetails ? this.fullDetails.address : null,
-    dob: this.dobVisible && this.fullDetails ? this.fullDetails.dob : null,
+    houseNumber: this.houseNumberVisible ? this.houseNumber : null,
+    streetName: this.streetNameVisible ? this.streetName : null,
+    suburb: this.suburbVisible ? this.suburb : null,
+    town: this.townVisible ? this.town : null,
+    postalCode: this.postalCodeVisible ? this.postalCode : null,
+    province: this.provinceVisible ? this.province : null,
+    dateOfBirth: this.dateOfBirthVisible ? this.dateOfBirth : null,
     profilePhoto: this.profilePhoto,
     emergencyContacts: this.emergencyContactsVisible 
       ? this.emergencyContacts.filter(c => c.isPublic).map(c => ({

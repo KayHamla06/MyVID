@@ -1,0 +1,133 @@
+/* About Page Styles */
+
+.header-nav {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.header-nav a {
+  color: rgb(8, 8, 8);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.header-nav a:hover,
+.header-nav a.active {
+  background: var(--color-primary);
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin: 1.5rem 0;
+}
+
+.feature-box {
+  padding: 1.5rem;
+  background: var(--color-background);
+  border-radius: 8px;
+  border-left: 4px solid var(--color-primary);
+  text-align: center;
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.feature-box h4 {
+  color: var(--color-primary);
+  margin-bottom: 0.8rem;
+  font-size: 1.1rem;
+}
+
+.feature-box p {
+  color: var(--color-text-light);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.info-list-item {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  padding: 1rem;
+  background: var(--color-background);
+  border-radius: 6px;
+}
+
+.list-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.info-list-item p {
+  color: var(--color-text-light);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.commitment-box {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: var(--color-background);
+  border-radius: 8px;
+  border-left: 4px solid var(--color-primary);
+}
+
+.commitment-box:last-child {
+  margin-bottom: 0;
+}
+
+.commitment-box h4 {
+  color: var(--color-primary);
+  margin-bottom: 0.8rem;
+  font-size: 1.1rem;
+}
+
+.commitment-box p {
+  color: var(--color-text-light);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.about-content {
+  line-height: 1.8;
+}
+
+.about-content h4 {
+  font-size: 1.3rem;
+  color: var(--color-primary);
+  margin-top: 1.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.about-content h4:first-child {
+  margin-top: 0;
+}
+
+.about-content p {
+  color: var(--color-text-light);
+  margin-bottom: 1rem;
+}
+
+.cta-section {
+  text-align: center;
+}
+
+.cta-text {
+  margin-bottom: 1.5rem;
+  color: var(--color-text-light);
+}

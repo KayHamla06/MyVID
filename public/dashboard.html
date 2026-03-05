@@ -19,290 +19,354 @@
         <img src="assets/logo.jpeg" alt="SafePass ID Logo" class="logo">
         <h1>SafePass ID</h1>
       </div>
+      <nav class="header-nav">
+        <a href="/dashboard.html" class="nav-link active">Dashboard</a>
+        <a href="/store.html" class="nav-link">Store</a>
+        <a href="/contact.html" class="nav-link">Contact</a>
+        <a href="/about.html" class="nav-link">About</a>
+      </nav>
       <button id="logout" class="btn-logout">Logout</button>
     </div>
   </header>
 
-  <!-- Main Container -->
-  <div class="dashboard-container">
-    <!-- Welcome Banner -->
-    <div class="welcome-banner">
-      <h2>Welcome to Your SafePass Dashboard</h2>
-      <p>Manage your emergency information securely. Only the details you choose will be visible when needed.</p>
-    </div>
+  <!-- Horizontal Scrolling Container -->
+  <div class="horizontal-scroll-container" id="scroll-container">
+    
+    <!-- PAGE 1: MAIN DASHBOARD -->
+    <div class="scroll-page page-1">
+      <div class="dashboard-container">
+        <!-- Welcome Banner -->
+        <div class="welcome-banner">
+          <h2>Welcome to Your SafePass Dashboard</h2>
+          <p>Manage your emergency information securely. Only the details you choose will be visible when needed.</p>
+        </div>
 
-    <!-- Two Column Layout -->
-    <div class="dashboard-grid">
+        <!-- Two Column Layout -->
+        <div class="dashboard-grid">
+          
+          <!-- Left Column -->
+          <div class="left-column">
+            
+            <!-- Personal Info Card -->
+            <section class="card">
+              <div class="card-header">
+                <h3>👤 Personal Information</h3>
+              </div>
+              <form id="personal-form" class="card-body">
+                <div class="photo-upload-section">
+                  <img id="photo-preview" src="" alt="Profile Preview" class="profile-photo">
+                  <label for="photo" class="btn-upload">
+                    <input type="file" id="photo" accept="image/*" hidden>
+                    Change Photo
+                  </label>
+                </div>
+
+                <div class="form-group">
+                  <label for="firstName">First Name</label>
+                  <input type="text" id="firstName" placeholder="Enter your first name">
+                  <label class="checkbox-container">
+                    <input type="checkbox" id="firstNameVisible">
+                    <span>Make this visible publicly</span>
+                  </label>
+                </div>
+
+                <div class="form-group">
+                  <label for="phoneNumber">Phone Number</label>
+                  <input type="tel" id="phoneNumber" placeholder="Enter your phone number (e.g., +1234567890)">
+                  <label class="checkbox-container">
+                    <input type="checkbox" id="phoneVisible">
+                    <span>Make this visible publicly</span>
+                  </label>
+                </div>
+
+                <div class="form-group">
+                  <label for="country">Country</label>
+                  <input type="text" id="country" placeholder="Enter your country">
+                  <label class="checkbox-container">
+                    <input type="checkbox" id="countryVisible">
+                    <span>Make this visible publicly</span>
+                  </label>
+                </div>
+                
+                <button type="submit" class="btn-primary">Save Personal Info</button>
+              </form>
+            </section>
+
+            <!-- Full Details Card -->
+            <section class="card">
+              <div class="card-header">
+                <h3>🔒 Full Details (Private)</h3>
+                <p class="header-subtitle">These details are stored securely and never shared publicly</p>
+              </div>
+              <form id="full-form" class="card-body">
+                <div class="form-group">
+                  <label for="lastName">Last Name</label>
+                  <input type="text" id="lastName" placeholder="Enter your last name">
+                  <label class="checkbox-container">
+                    <input type="checkbox" id="lastNameVisible">
+                    <span>Make this visible publicly</span>
+                  </label>
+                </div>
+
+                <!-- Address Fields (6 separate inputs) -->
+                <fieldset class="address-fieldset">
+                  <legend>📍 Full Address</legend>
+                  
+                  <div class="form-group">
+                    <label for="houseNumber">House Number</label>
+                    <input type="text" id="houseNumber" placeholder="e.g., 123">
+                    <label class="checkbox-container">
+                      <input type="checkbox" id="houseNumberVisible">
+                      <span>Make this visible publicly</span>
+                    </label>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="streetName">Street Name</label>
+                    <input type="text" id="streetName" placeholder="e.g., Main Street">
+                    <label class="checkbox-container">
+                      <input type="checkbox" id="streetNameVisible">
+                      <span>Make this visible publicly</span>
+                    </label>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="suburb">Suburb</label>
+                    <input type="text" id="suburb" placeholder="e.g., Downtown">
+                    <label class="checkbox-container">
+                      <input type="checkbox" id="suburbVisible">
+                      <span>Make this visible publicly</span>
+                    </label>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="town">Town</label>
+                    <input type="text" id="town" placeholder="e.g., Johannesburg">
+                    <label class="checkbox-container">
+                      <input type="checkbox" id="townVisible">
+                      <span>Make this visible publicly</span>
+                    </label>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="postalCode">Postal Code</label>
+                    <input type="text" id="postalCode" placeholder="e.g., 2000">
+                    <label class="checkbox-container">
+                      <input type="checkbox" id="postalCodeVisible">
+                      <span>Make this visible publicly</span>
+                    </label>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="province">Province</label>
+                    <input type="text" id="province" placeholder="e.g., Gauteng">
+                    <label class="checkbox-container">
+                      <input type="checkbox" id="provinceVisible">
+                      <span>Make this visible publicly</span>
+                    </label>
+                  </div>
+                </fieldset>
+
+                <!-- Date of Birth (Text Input) -->
+                <div class="form-group">
+                  <label for="dateOfBirth">Date of Birth</label>
+                  <input type="text" id="dateOfBirth" placeholder="YYYY-MM-DD (e.g., 1990-05-15)">
+                  <small class="form-hint">Enter in format: YYYY-MM-DD</small>
+                  <label class="checkbox-container">
+                    <input type="checkbox" id="dateOfBirthVisible">
+                    <span>Make this visible publicly</span>
+                  </label>
+                </div>
+
+                <button type="submit" class="btn-primary">Save Full Details</button>
+              </form>
+            </section>
+
+            <!-- Medical Info Card -->
+            <section class="card">
+              <div class="card-header">
+                <h3>🏥 Medical Information</h3>
+                <p class="header-subtitle">Share critical alerts that responders should know</p>
+              </div>
+              <div class="card-body">
+                <div id="alerts-list" class="list-container"></div>
+
+                <div class="alert-input-group">
+                  <label for="medical-alert">Medical Alert</label>
+                  <input type="text" id="medical-alert" placeholder="e.g., Allergic to penicillin" title="Enter a medical alert or condition">
+                  <button type="button" id="add-alert" class="btn-add">Add Alert</button>
+                </div>
+
+                <form id="medical-form" class="medical-notes-form">
+                  <div class="form-group">
+                    <label for="medical-notes">Private Medical Notes</label>
+                    <textarea id="medical-notes" rows="4" placeholder="Add private notes here (not shared publicly)"></textarea>
+                    <label class="checkbox-container">
+                      <input type="checkbox" id="medicalNotesVisible">
+                      <span>Make medical notes visible publicly</span>
+                    </label>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="checkbox-container">
+                      <input type="checkbox" id="medicalAlertsVisible">
+                      <span>Make medical alerts visible publicly</span>
+                    </label>
+                  </div>
+
+                  <button type="submit" class="btn-primary">Save Medical Info</button>
+                </form>
+              </div>
+            </section>
+
+            <!-- Emergency Contacts Card -->
+            <section class="card">
+              <div class="card-header">
+                <h3>📞 Emergency Contacts</h3>
+                <p class="header-subtitle">Add trusted people who can be reached in case of emergency</p>
+              </div>
+              <div class="card-body">
+                <div id="contacts-list" class="list-container"></div>
+                
+                <label class="checkbox-container">
+                  <input type="checkbox" id="emergencyContactsVisible">
+                  <span>Make emergency contacts visible publicly</span>
+                </label>
+                
+                <form id="contact-form" class="add-form">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="contact-name">Name</label>
+                      <input type="text" id="contact-name" placeholder="Contact name" required>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="contact-phone">Phone</label>
+                      <input type="tel" id="contact-phone" placeholder="Phone number" required>
+                    </div>
+                  </div>
+                  
+                  <label class="checkbox-container">
+                    <input type="checkbox" id="contact-public">
+                    <span>Make this contact visible publicly</span>
+                  </label>
+
+                  <button type="submit" class="btn-secondary">Add Contact</button>
+                </form>
+              </div>
+            </section>
+
+            <!-- Emergency Numbers Card -->
+            <section class="card">
+              <div class="card-header">
+                <h3>🚨 Emergency Numbers</h3>
+                <p class="header-subtitle">Quick access to emergency services</p>
+              </div>
+              <div class="card-body">
+                <div class="emergency-numbers-list">
+                  <a href="tel:10111" class="emergency-btn police-btn">
+                    <span class="btn-icon">🚔</span>
+                    <span class="btn-label">Emergency Police Services</span>
+                    <span class="btn-number">10111</span>
+                  </a>
+                  <a href="tel:082911" class="emergency-btn ambulance-btn">
+                    <span class="btn-icon">🚑</span>
+                    <span class="btn-label">Netcare Private Medical Care</span>
+                    <span class="btn-number">082 911</span>
+                  </a>
+                  <a href="tel:10177" class="emergency-btn ambulance-btn">
+                    <span class="btn-icon">🚑</span>
+                    <span class="btn-label">Ambulance</span>
+                    <span class="btn-number">112</span>
+                  </a>
+                  <a href="tel:084124" class="emergency-btn emergency-btn-main">
+                    <span class="btn-icon">🚨</span>
+                    <span class="btn-label">ER24 Emergency</span>
+                    <span class="btn-number">084 124</span>
+                  </a>
+                  <a href="tel:10177" class="emergency-btn fire-btn">
+                    <span class="btn-icon">🚒</span>
+                    <span class="btn-label">Fire Brigade</span>
+                    <span class="btn-number">10177</span>
+                  </a>
+
+                </div>
+               <p class="emergency-note">The National Number for any Emergency Services in South Africa is 
+                <strong>
+                  <a href="tel:112" class="emergency-btn fire-btn">
+                    <span class="btn-label">Emergency Services</span>
+                    <span class="btn-number">112</span>
+                  </a>
+                </strong>.
+               </p>
+
+              </div>
+            </section>
       
-      <!-- Left Column -->
-      <div class="left-column">
-        
-        <!-- Personal Info Card -->
-        <section class="card">
-          <div class="card-header">
-            <h3>👤 Personal Information</h3>
           </div>
-          <form id="personal-form" class="card-body">
-            <div class="photo-upload-section">
-              <img id="photo-preview" src="" alt="Profile Preview" class="profile-photo">
-              <label for="photo" class="btn-upload">
-                <input type="file" id="photo" accept="image/*" hidden>
-                Change Photo
-              </label>
-            </div>
 
-            <div class="form-group">
-              <label for="firstName">First Name</label>
-              <input type="text" id="firstName" placeholder="Enter your first name">
-              <label class="checkbox-container">
-                <input type="checkbox" id="firstNameVisible">
-                <span>Make this visible publicly</span>
-              </label>
-            </div>
-
-            <div class="form-group">
-              <label for="phoneNumber">Phone Number</label>
-              <input type="tel" id="phoneNumber" placeholder="Enter your phone number (e.g., +1234567890)">
-              <label class="checkbox-container">
-                <input type="checkbox" id="phoneVisible">
-                <span>Make this visible publicly</span>
-              </label>
-            </div>
-
-            <div class="form-group">
-              <label for="country">Country</label>
-              <input type="text" id="country" placeholder="Enter your country">
-              <label class="checkbox-container">
-                <input type="checkbox" id="countryVisible">
-                <span>Make this visible publicly</span>
-              </label>
-            </div>
+          <!-- Right Column -->
+          <div class="right-column">
             
-            <button type="submit" class="btn-primary">Save Personal Info</button>
-          </form>
-        </section>
-
-        <!-- Full Details Card -->
-        <section class="card">
-          <div class="card-header">
-            <h3>🔒 Full Details (Private)</h3>
-            <p class="header-subtitle">These details are stored securely and never shared publicly</p>
-          </div>
-          <form id="full-form" class="card-body">
-            <div class="form-group">
-              <label for="lastName">Last Name</label>
-              <input type="text" id="lastName" placeholder="Enter your last name">
-              <label class="checkbox-container">
-                <input type="checkbox" id="lastNameVisible">
-                <span>Make this visible publicly</span>
-              </label>
-            </div>
-
-            <div class="form-group">
-              <label for="address">Address</label>
-              <input type="text" id="address" placeholder="Enter your address">
-              <label class="checkbox-container">
-                <input type="checkbox" id="addressVisible">
-                <span>Make this visible publicly</span>
-              </label>
-            </div>
-
-            <div class="form-group">
-              <label for="dob">Date of Birth</label>
-              <input type="date" id="dob">
-              <label class="checkbox-container">
-                <input type="checkbox" id="dobVisible">
-                <span>Make this visible publicly</span>
-              </label>
-            </div>
-
-            <button type="submit" class="btn-primary">Save Full Details</button>
-          </form>
-        </section>
-
-        <!-- Medical Info Card -->
-        <section class="card">
-          <div class="card-header">
-            <h3>🏥 Medical Information</h3>
-            <p class="header-subtitle">Share critical alerts that responders should know</p>
-          </div>
-          <div class="card-body">
-            <div id="alerts-list" class="list-container"></div>
-
-            <div class="alert-input-group">
-              <label for="medical-alert">Medical Alert</label>
-              <input type="text" id="medical-alert" placeholder="e.g., Allergic to penicillin" title="Enter a medical alert or condition">
-              <button type="button" id="add-alert" class="btn-add">Add Alert</button>
-            </div>
-
-            <form id="medical-form" class="medical-notes-form">
-              <div class="form-group">
-                <label for="medical-notes">Private Medical Notes</label>
-                <textarea id="medical-notes" rows="4" placeholder="Add private notes here (not shared publicly)"></textarea>
-                <label class="checkbox-container">
-                  <input type="checkbox" id="medicalNotesVisible">
-                  <span>Make medical notes visible publicly</span>
-                </label>
+            <!-- QR Code Card -->
+            <section class="card qr-card">
+              <div class="card-header">
+                <h3>📱 Your QR Code</h3>
+                <p class="header-subtitle">Generate a QR code that shares your emergency information</p>
               </div>
-
-              <div class="form-group">
-                <label class="checkbox-container">
-                  <input type="checkbox" id="medicalAlertsVisible">
-                  <span>Make medical alerts visible publicly</span>
-                </label>
-              </div>
-
-              <button type="submit" class="btn-primary">Save Medical Info</button>
-            </form>
-          </div>
-        </section>
-
-        <!-- Emergency Contacts Card -->
-        <section class="card">
-          <div class="card-header">
-            <h3>📞 Emergency Contacts</h3>
-            <p class="header-subtitle">Add trusted people who can be reached in case of emergency</p>
-          </div>
-          <div class="card-body">
-            <div id="contacts-list" class="list-container"></div>
-            
-            <label class="checkbox-container">
-              <input type="checkbox" id="emergencyContactsVisible">
-              <span>Make emergency contacts visible publicly</span>
-            </label>
-            
-            <form id="contact-form" class="add-form">
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="contact-name">Name</label>
-                  <input type="text" id="contact-name" placeholder="Contact name" required>
+              <div class="card-body qr-body">
+                <div class="qr-preview-container">
+                  <img id="qr-preview" alt="QR Code" class="qr-hidden">
+                  <div class="qr-placeholder">
+                    <span>🔲</span>
+                    <p>No QR code generated yet</p>
+                  </div>
                 </div>
 
-                <div class="form-group">
-                  <label for="contact-phone">Phone</label>
-                  <input type="tel" id="contact-phone" placeholder="Phone number" required>
+                <div class="qr-actions">
+                  <button id="generate-qr" class="btn-primary btn-large">Generate QR Code</button>
+                  <button id="view-public-profile" class="btn-secondary">View Public Profile</button>
+                  <button id="toggle-qr" class="btn-secondary">Enable QR</button>
+                </div>
+
+                <div class="download-buttons">
+                  <a id="download-svg" class="btn-download btn-hidden">
+                    📄 Download SVG
+                  </a>
+                  <a id="download-png" class="btn-download btn-hidden">
+                    🖼️ Download PNG
+                  </a>
                 </div>
               </div>
-              
-              <label class="checkbox-container">
-                <input type="checkbox" id="contact-public">
-                <span>Make this contact visible publicly</span>
-              </label>
+            </section>
 
-              <button type="submit" class="btn-secondary">Add Contact</button>
-            </form>
-          </div>
-        </section>
-
-        <!-- Emergency Numbers Card -->
-        <section class="card">
-          <div class="card-header">
-            <h3>🚨 Emergency Numbers</h3>
-            <p class="header-subtitle">Quick access to emergency services</p>
-          </div>
-          <div class="card-body">
-            <div class="emergency-numbers-list">
-              <a href="tel:10111" class="emergency-btn police-btn">
-                <span class="btn-icon">🚔</span>
-                <span class="btn-label">Emergency Police Services</span>
-                <span class="btn-number">10111</span>
-              </a>
-              <a href="tel:082911" class="emergency-btn ambulance-btn">
-                <span class="btn-icon">🚑</span>
-                <span class="btn-label">Netcare Private Medical Care</span>
-                <span class="btn-number">082 911</span>
-              </a>
-              <a href="tel:10177" class="emergency-btn ambulance-btn">
-                <span class="btn-icon">🚑</span>
-                <span class="btn-label">Ambulance</span>
-                <span class="btn-number">10177</span>
-              </a>
-              <a href="tel:084124" class="emergency-btn emergency-btn-main">
-                <span class="btn-icon">🚨</span>
-                <span class="btn-label">ER24 Emergency</span>
-                <span class="btn-number">084 124</span>
-              </a>
-              <a href="tel:10177" class="emergency-btn fire-btn">
-                <span class="btn-icon">🚒</span>
-                <span class="btn-label">Fire Brigade</span>
-                <span class="btn-number">10177</span>
-              </a>
-
-            </div>
-           <p class="emergency-note">The National Number for any Emergency Services in South Africa is 
-            <strong>
-              <a href="tel:112" class="emergency-btn fire-btn">
-                <span class="btn-label">Emergency Services</span>
-                <span class="btn-number">112</span>
-              </a>
-            </strong>.
-           </p>
-
-          </div>
-        </section>
-  
-      </div>
-
-      <!-- Right Column -->
-      <div class="right-column">
-        
-        <!-- QR Code Card -->
-        <section class="card qr-card">
-          <div class="card-header">
-            <h3>📱 Your QR Code</h3>
-            <p class="header-subtitle">Generate a QR code that shares your emergency information</p>
-          </div>
-          <div class="card-body qr-body">
-            <div class="qr-preview-container">
-              <img id="qr-preview" alt="QR Code" class="qr-hidden">
-              <div class="qr-placeholder">
-                <span>🔲</span>
-                <p>No QR code generated yet</p>
+            <!-- Info Card -->
+            <section class="card info-card">
+              <div class="card-header">
+                <h3>ℹ️ How It Works</h3>
               </div>
-            </div>
+              <div class="card-body">
+                <ol class="info-list">
+                  <li>Fill in your emergency information</li>
+                  <li>Generate your unique QR code</li>
+                  <li>Print or save it to your phone</li>
+                  <li>In an emergency, responders can scan it</li>
+                  <li>They'll see only what you've made public</li>
+                </ol>
+              </div>
+            </section>
 
-            <div class="qr-actions">
-              <button id="generate-qr" class="btn-primary btn-large">Generate QR Code</button>
-              <button id="view-public-profile" class="btn-secondary">View Public Profile</button>
-              <button id="toggle-qr" class="btn-secondary">Enable QR</button>
-            </div>
+            <!-- Support Card -->
+            <section class="card support-card">
+              <div class="card-body">
+                <p class="support-text">💜 You are safe. You are seen. You are not alone.</p>
+              </div>
+            </section>
 
-            <div class="download-buttons">
-              <a id="download-svg" class="btn-download btn-hidden">
-                📄 Download SVG
-              </a>
-              <a id="download-png" class="btn-download btn-hidden">
-                🖼️ Download PNG
-              </a>
-            </div>
           </div>
-        </section>
 
-        <!-- Info Card -->
-        <section class="card info-card">
-          <div class="card-header">
-            <h3>ℹ️ How It Works</h3>
-          </div>
-          <div class="card-body">
-            <ol class="info-list">
-              <li>Fill in your emergency information</li>
-              <li>Generate your unique QR code</li>
-              <li>Print or save it to your phone</li>
-              <li>In an emergency, responders can scan it</li>
-              <li>They'll see only what you've made public</li>
-            </ol>
-          </div>
-        </section>
-
-        <!-- Support Card -->
-        <section class="card support-card">
-          <div class="card-body">
-            <p class="support-text">💜 You are safe. You are seen. You are not alone.</p>
-          </div>
-        </section>
-
+        </div>
       </div>
-
     </div>
   </div>
 
@@ -312,5 +376,6 @@
   </footer>
 
   <script src="js/dashboard.js"></script>
+  <script src="js/pages.js"></script>
 </body>
 </html>

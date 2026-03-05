@@ -41,10 +41,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('countryVisible').checked = profile.countryVisible === true;
     document.getElementById('lastName').value = profile.lastName || '';
     document.getElementById('lastNameVisible').checked = profile.lastNameVisible === true;
-    document.getElementById('address').value = profile.fullDetails?.address || '';
-    document.getElementById('addressVisible').checked = profile.addressVisible === true;
-    document.getElementById('dob').value = profile.fullDetails?.dob ? new Date(profile.fullDetails.dob).toISOString().split('T')[0] : '';
-    document.getElementById('dobVisible').checked = profile.dobVisible === true;
+    
+    // Address Fields
+    document.getElementById('houseNumber').value = profile.houseNumber || '';
+    document.getElementById('houseNumberVisible').checked = profile.houseNumberVisible === true;
+    document.getElementById('streetName').value = profile.streetName || '';
+    document.getElementById('streetNameVisible').checked = profile.streetNameVisible === true;
+    document.getElementById('suburb').value = profile.suburb || '';
+    document.getElementById('suburbVisible').checked = profile.suburbVisible === true;
+    document.getElementById('town').value = profile.town || '';
+    document.getElementById('townVisible').checked = profile.townVisible === true;
+    document.getElementById('postalCode').value = profile.postalCode || '';
+    document.getElementById('postalCodeVisible').checked = profile.postalCodeVisible === true;
+    document.getElementById('province').value = profile.province || '';
+    document.getElementById('provinceVisible').checked = profile.provinceVisible === true;
+    
+    // Date of Birth (format as YYYY-MM-DD for text input)
+    if (profile.dateOfBirth) {
+      const date = new Date(profile.dateOfBirth);
+      document.getElementById('dateOfBirth').value = date.toISOString().split('T')[0];
+    } else {
+      document.getElementById('dateOfBirth').value = '';
+    }
+    document.getElementById('dateOfBirthVisible').checked = profile.dateOfBirthVisible === true;
+    
     document.getElementById('medical-notes').value = profile.medicalNotes || '';
     if (document.getElementById('medicalAlertsVisible')) {
       document.getElementById('medicalAlertsVisible').checked = profile.medicalAlertsVisible === true;
@@ -375,16 +395,42 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('full-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     try {
+      const dobValue = document.getElementById('dateOfBirth').value;
+      let dobDate = null;
+      
+      // Parse date from YYYY-MM-DD format if provided
+      if (dobValue) {
+        const dobParts = dobValue.split('-');
+        if (dobParts.length !== 3) {
+          showNotification('Date format must be YYYY-MM-DD', 'error');
+          return;
+        }
+        dobDate = new Date(`${dobValue}T00:00:00Z`);
+        if (isNaN(dobDate.getTime())) {
+          showNotification('Invalid date', 'error');
+          return;
+        }
+      }
+
       const updates = { 
         lastName: document.getElementById('lastName').value,
         lastNameVisible: document.getElementById('lastNameVisible').checked,
-        fullDetails: {
-          address: document.getElementById('address').value,
-          dob: document.getElementById('dob').value
-        },
-        addressVisible: document.getElementById('addressVisible').checked,
-        dobVisible: document.getElementById('dobVisible').checked
+        houseNumber: document.getElementById('houseNumber').value,
+        houseNumberVisible: document.getElementById('houseNumberVisible').checked,
+        streetName: document.getElementById('streetName').value,
+        streetNameVisible: document.getElementById('streetNameVisible').checked,
+        suburb: document.getElementById('suburb').value,
+        suburbVisible: document.getElementById('suburbVisible').checked,
+        town: document.getElementById('town').value,
+        townVisible: document.getElementById('townVisible').checked,
+        postalCode: document.getElementById('postalCode').value,
+        postalCodeVisible: document.getElementById('postalCodeVisible').checked,
+        province: document.getElementById('province').value,
+        provinceVisible: document.getElementById('provinceVisible').checked,
+        dateOfBirth: dobDate,
+        dateOfBirthVisible: document.getElementById('dateOfBirthVisible').checked
       };
+      
       const res = await fetch('/api/user/profile', { 
         method: 'PUT', 
         headers: { 
@@ -542,4 +588,54 @@ document.addEventListener('DOMContentLoaded', async () => {
     localStorage.removeItem('token');
     window.location.href = '/';
   });
+
+  // Horizontal Scrolling Navigation
+  const scrollContainer = document.getElementById('scroll-container');
+  const scrollPrevBtn = document.getElementById('scroll-prev');
+  const scrollNextBtn = document.getElementById('scroll-next');
+  const scrollDots = document.getElementById('scroll-dots');
+  const scrollPages = document.querySelectorAll('.scroll-page');
+  let currentPage = 0;
+
+  // Create scroll dots
+  scrollPages.forEach((_, index) => {
+    const dot = document.createElement('button');
+    dot.className = `scroll-dot ${index === 0 ? 'active' : ''}`;
+    dot.addEventListener('click', () => scrollToPage(index));
+    scrollDots.appendChild(dot);
+  });
+
+  const updateScrollButtons = () => {
+    scrollPrevBtn.disabled = currentPage === 0;
+    scrollNextBtn.disabled = currentPage === scrollPages.length - 1;
+    
+    // Update active dot
+    document.querySelectorAll('.scroll-dot').forEach((dot, index) => {
+      dot.classList.toggle('active', index === currentPage);
+    });
+  };
+
+  const scrollToPage = (pageIndex) => {
+    currentPage = pageIndex;
+    const scrollLeft = scrollContainer.clientWidth * pageIndex;
+    scrollContainer.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+    updateScrollButtons();
+  };
+
+  scrollPrevBtn.addEventListener('click', () => {
+    if (currentPage > 0) scrollToPage(currentPage - 1);
+  });
+
+  scrollNextBtn.addEventListener('click', () => {
+    if (currentPage < scrollPages.length - 1) scrollToPage(currentPage + 1);
+  });
+
+  // Update page tracking on scroll
+  scrollContainer.addEventListener('scroll', () => {
+    const pageWidth = scrollContainer.clientWidth;
+    currentPage = Math.round(scrollContainer.scrollLeft / pageWidth);
+    updateScrollButtons();
+  });
+
+  updateScrollButtons();
 });

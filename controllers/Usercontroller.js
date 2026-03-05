@@ -49,15 +49,26 @@ exports.updateProfile = async (req, res) => {
       'phoneVisible',
       'country',
       'countryVisible',
+      'houseNumber',
+      'houseNumberVisible',
+      'streetName',
+      'streetNameVisible',
+      'suburb',
+      'suburbVisible',
+      'town',
+      'townVisible',
+      'postalCode',
+      'postalCodeVisible',
+      'province',
+      'provinceVisible',
+      'dateOfBirth',
+      'dateOfBirthVisible',
       'emergencyContacts',
       'emergencyContactsVisible',
       'medicalAlerts',
       'medicalAlertsVisible',
       'medicalNotes',
-      'medicalNotesVisible',
-      'fullDetails',
-      'addressVisible',
-      'dobVisible'
+      'medicalNotesVisible'
     ];
 
     // Build updates object with only whitelisted fields

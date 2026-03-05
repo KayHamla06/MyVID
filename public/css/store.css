@@ -1,0 +1,142 @@
+/* Store Page Styles */
+
+.header-nav {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.header-nav a {
+  color: rgb(14, 13, 13);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.header-nav a:hover,
+.header-nav a.active {
+  background: var(--color-primary);
+}
+
+.coming-soon-card {
+  max-width: 600px;
+  margin: 2rem auto;
+  text-align: center;
+}
+
+.coming-soon-content {
+  padding: 3rem 2rem;
+}
+
+.coming-soon-icon {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.coming-soon-content h3 {
+  font-size: 1.8rem;
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+}
+
+.coming-soon-content p {
+  color: var(--color-text-light);
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.store-description {
+  font-size: 1rem !important;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.feature-item {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  padding: 1.5rem;
+  background: var(--color-background);
+  border-radius: 8px;
+  border-left: 4px solid var(--color-primary);
+}
+
+.feature-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.feature-content {
+  flex: 1;
+}
+
+.feature-content h4 {
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.feature-content p {
+  color: var(--color-text-light);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.notify-section {
+  text-align: center;
+}
+
+.notify-section p {
+  color: var(--color-text-light);
+  margin-bottom: 1.5rem;
+}
+
+.notify-form {
+  display: flex;
+  gap: 1rem;
+  max-width: 500px;
+  margin: 0 auto 1rem;
+}
+
+.notify-form input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.notify-form input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.notify-form button {
+  white-space: nowrap;
+}
+
+.notify-note {
+  font-size: 0.9rem;
+  color: var(--color-secondary);
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .notify-form {
+    flex-direction: column;
+  }
+  
+  .notify-form button {
+    width: 100%;
+  }
+}
