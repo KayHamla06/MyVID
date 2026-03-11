@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!token) return window.location.href = '/login';
 
   let profile = {};
+  let latestPost = null;
+  let storeItems = [];
   
   const showNotification = (message, type = 'success') => {
     const notif = document.createElement('div');
@@ -22,6 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const { data } = await res.json();
         profile = data;
         populateForms();
+        updateVerificationStatus();
       } else {
         localStorage.removeItem('token');
         window.location.href = '/login';
@@ -66,11 +69,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('dateOfBirthVisible').checked = profile.dateOfBirthVisible === true;
     
     document.getElementById('medical-notes').value = profile.medicalNotes || '';
+    if (document.getElementById('bloodType')) {
+      document.getElementById('bloodType').value = profile.bloodType || '';
+    }
+    if (document.getElementById('allergies')) {
+      document.getElementById('allergies').value = Array.isArray(profile.allergies) ? profile.allergies.join(', ') : '';
+    }
     if (document.getElementById('medicalAlertsVisible')) {
       document.getElementById('medicalAlertsVisible').checked = profile.medicalAlertsVisible === true;
     }
     if (document.getElementById('medicalNotesVisible')) {
       document.getElementById('medicalNotesVisible').checked = profile.medicalNotesVisible === true;
+    }
+    if (document.getElementById('bloodTypeVisible')) {
+      document.getElementById('bloodTypeVisible').checked = profile.bloodTypeVisible === true;
+    }
+    if (document.getElementById('allergiesVisible')) {
+      document.getElementById('allergiesVisible').checked = profile.allergiesVisible === true;
     }
     document.getElementById('emergencyContactsVisible').checked = profile.emergencyContactsVisible === true;
 
@@ -136,6 +151,95 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
+  const updateVerificationStatus = () => {
+    const status = document.getElementById('verification-status');
+    if (!status) return;
+
+    if (profile.verified) {
+      status.classList.remove('hidden');
+      status.textContent = `✔ Verified SafePassID${profile.verifiedMethod ? ` via ${profile.verifiedMethod}` : ''}`;
+    } else {
+      status.classList.add('hidden');
+    }
+  };
+
+  const fetchDashboardFeed = async () => {
+    try {
+      const res = await fetch('/api/user/dashboard-feed', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to fetch dashboard feed');
+      }
+
+      const { data } = await res.json();
+      latestPost = data.latestPost;
+      storeItems = data.storeItems || [];
+      renderLatestPost();
+      renderRecentScans(data.recentScans || []);
+    } catch (error) {
+      console.error('Fetch dashboard feed error:', error);
+    }
+  };
+
+  const renderLatestPost = () => {
+    const card = document.getElementById('latest-post-card');
+    if (!card || !latestPost) {
+      if (card) card.classList.add('hidden');
+      return;
+    }
+
+    card.classList.remove('hidden');
+    document.getElementById('post-title').textContent = latestPost.title;
+    document.getElementById('post-content').textContent = latestPost.content;
+    document.getElementById('post-meta').textContent = `${latestPost.adminName} • ${new Date(latestPost.createdAt).toLocaleString()}`;
+    document.getElementById('post-reaction-count').textContent = `👍 ${latestPost.reactionCount} reactions`;
+    document.getElementById('post-comment-count').textContent = `💬 ${latestPost.commentCount} comments`;
+
+    const image = document.getElementById('post-image');
+    if (latestPost.imageUrl) {
+      image.src = latestPost.imageUrl;
+      image.classList.remove('hidden');
+    } else {
+      image.classList.add('hidden');
+    }
+
+    document.querySelectorAll('.reaction-btn').forEach(button => {
+      button.classList.toggle('active', button.dataset.reaction === latestPost.currentUserReaction);
+    });
+
+    const comments = document.getElementById('post-comments');
+    comments.innerHTML = latestPost.comments.length
+      ? latestPost.comments.map(comment => `
+          <div class="comment-item">
+            <span class="comment-author">${escapeHtml(comment.author)}</span>
+            <p>${escapeHtml(comment.comment)}</p>
+          </div>
+        `).join('')
+      : '<p class="empty-state">No comments yet.</p>';
+  };
+
+  const renderRecentScans = scans => {
+    const container = document.getElementById('recent-scans');
+    if (!container) return;
+
+    if (!scans.length) {
+      container.innerHTML = '<p class="empty-state">No scans recorded yet.</p>';
+      return;
+    }
+
+    container.innerHTML = scans.map(scan => `
+      <div class="scan-item">
+        <div>
+          <strong>Your SafePassID was scanned</strong>
+          <div class="scan-meta">📍 ${escapeHtml(scan.location)}</div>
+        </div>
+        <div class="scan-meta">🕒 ${new Date(scan.scannedAt).toLocaleString()}<br>${escapeHtml(scan.device)}</div>
+      </div>
+    `).join('');
+  };
+
   const loadQRPreview = async () => {
     try {
       const res = await fetch('/api/user/qr/generate', { 
@@ -156,6 +260,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   await fetchProfile();
+  await fetchDashboardFeed();
 
   // Personal info form
   document.getElementById('personal-form').addEventListener('submit', async (e) => {
@@ -369,8 +474,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const updates = { 
         medicalNotes: document.getElementById('medical-notes').value,
+        bloodType: document.getElementById('bloodType') ? document.getElementById('bloodType').value : '',
+        allergies: document.getElementById('allergies')
+          ? document.getElementById('allergies').value.split(',').map(item => item.trim()).filter(Boolean)
+          : [],
         medicalAlertsVisible: document.getElementById('medicalAlertsVisible') ? document.getElementById('medicalAlertsVisible').checked : false,
-        medicalNotesVisible: document.getElementById('medicalNotesVisible') ? document.getElementById('medicalNotesVisible').checked : false
+        medicalNotesVisible: document.getElementById('medicalNotesVisible') ? document.getElementById('medicalNotesVisible').checked : false,
+        bloodTypeVisible: document.getElementById('bloodTypeVisible') ? document.getElementById('bloodTypeVisible').checked : false,
+        allergiesVisible: document.getElementById('allergiesVisible') ? document.getElementById('allergiesVisible').checked : false
       };
       const res = await fetch('/api/user/profile', { 
         method: 'PUT', 
@@ -589,53 +700,66 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.href = '/';
   });
 
-  // Horizontal Scrolling Navigation
-  const scrollContainer = document.getElementById('scroll-container');
-  const scrollPrevBtn = document.getElementById('scroll-prev');
-  const scrollNextBtn = document.getElementById('scroll-next');
-  const scrollDots = document.getElementById('scroll-dots');
-  const scrollPages = document.querySelectorAll('.scroll-page');
-  let currentPage = 0;
+  document.getElementById('reaction-bar')?.addEventListener('click', async e => {
+    const button = e.target.closest('.reaction-btn');
+    if (!button || !latestPost) return;
 
-  // Create scroll dots
-  scrollPages.forEach((_, index) => {
-    const dot = document.createElement('button');
-    dot.className = `scroll-dot ${index === 0 ? 'active' : ''}`;
-    dot.addEventListener('click', () => scrollToPage(index));
-    scrollDots.appendChild(dot);
+    try {
+      button.classList.add('bump');
+      const res = await fetch(`/api/user/posts/${latestPost.id}/reactions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ reactionType: button.dataset.reaction })
+      });
+
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Reaction failed');
+      latestPost = result.data;
+      renderLatestPost();
+    } catch (error) {
+      showNotification(error.message || 'Failed to react', 'error');
+    } finally {
+      setTimeout(() => button.classList.remove('bump'), 300);
+    }
   });
 
-  const updateScrollButtons = () => {
-    scrollPrevBtn.disabled = currentPage === 0;
-    scrollNextBtn.disabled = currentPage === scrollPages.length - 1;
-    
-    // Update active dot
-    document.querySelectorAll('.scroll-dot').forEach((dot, index) => {
-      dot.classList.toggle('active', index === currentPage);
-    });
-  };
+  document.getElementById('post-comment-form')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!latestPost) return;
 
-  const scrollToPage = (pageIndex) => {
-    currentPage = pageIndex;
-    const scrollLeft = scrollContainer.clientWidth * pageIndex;
-    scrollContainer.scrollTo({ left: scrollLeft, behavior: 'smooth' });
-    updateScrollButtons();
-  };
+    const input = document.getElementById('post-comment-input');
+    const comment = input.value.trim();
+    if (!comment) return;
 
-  scrollPrevBtn.addEventListener('click', () => {
-    if (currentPage > 0) scrollToPage(currentPage - 1);
+    try {
+      const res = await fetch(`/api/user/posts/${latestPost.id}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ comment })
+      });
+
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Comment failed');
+      latestPost = result.data;
+      input.value = '';
+      renderLatestPost();
+    } catch (error) {
+      showNotification(error.message || 'Failed to comment', 'error');
+    }
   });
 
-  scrollNextBtn.addEventListener('click', () => {
-    if (currentPage < scrollPages.length - 1) scrollToPage(currentPage + 1);
-  });
-
-  // Update page tracking on scroll
-  scrollContainer.addEventListener('scroll', () => {
-    const pageWidth = scrollContainer.clientWidth;
-    currentPage = Math.round(scrollContainer.scrollLeft / pageWidth);
-    updateScrollButtons();
-  });
-
-  updateScrollButtons();
+  function escapeHtml(text) {
+    return String(text || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
 });

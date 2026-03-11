@@ -218,9 +218,19 @@ exports.login = async (req, res) => {
     // Generate token
     const token = generateToken(user._id);
 
-    // Update last login
+    // Update last login and verification state
     try {
       user.lastLogin = Date.now();
+
+      // A successful credentialed login confirms ownership of the login method.
+      if (isEmail && !user.verified) {
+        user.verified = true;
+        user.verifiedMethod = 'email';
+      } else if (isPhone && !user.verified && user.phoneNumber) {
+        user.verified = true;
+        user.verifiedMethod = 'phone';
+      }
+
       await user.save();
     } catch (saveError) {
       console.error('Failed to update last login:', saveError.message);
@@ -234,7 +244,9 @@ exports.login = async (req, res) => {
       user: {
         id: user._id,
         email: user.email,
-        firstName: user.firstName
+        firstName: user.firstName,
+        verified: user.verified,
+        verifiedMethod: user.verifiedMethod
       }
     });
 

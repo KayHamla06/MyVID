@@ -8,7 +8,10 @@ const {
   getProfile,
   updateProfile,
   getQRAccessLogs,
-  deleteAccount
+  deleteAccount,
+  getDashboardFeed,
+  reactToPost,
+  commentOnPost
 } = require('../controllers/Usercontroller');
 const userController = require('../controllers/Uploadcontroller');
 const {
@@ -25,6 +28,9 @@ const { uploadLimiter } = require('../middleware/Ratelimiter');
 router.get('/profile', protect, getProfile);
 router.put('/profile', protect, updateProfile);
 router.delete('/account', protect, deleteAccount);
+router.get('/dashboard-feed', protect, getDashboardFeed);
+router.post('/posts/:postId/reactions', protect, reactToPost);
+router.post('/posts/:postId/comments', protect, commentOnPost);
 
 /**
  * QR code routes

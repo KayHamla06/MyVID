@@ -71,9 +71,11 @@ app.get('/favicon.ico', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'favicon.ico'), { 
     maxAge: '1d',
     headers: { 'Cache-Control': 'public, max-age=86400' }
-  }).on('error', () => {
+  }, (err) => {
     // If favicon doesn't exist, send 204 (no content) instead of error
-    res.status(204).end();
+    if (err && !res.headersSent) {
+      res.status(204).end();
+    }
   });
 });
 
@@ -81,6 +83,7 @@ app.get('/favicon.ico', (req, res) => {
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/scan-log', require('./routes/scanLog'));
 app.use('/p', require('./routes/public'));
 app.use('/publicinfo', require('./routes/publicinfo'));
 app.use('/api/health', require('./routes/health'));

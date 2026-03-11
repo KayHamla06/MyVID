@@ -1,4 +1,7 @@
 const User = require('../models/User');
+const Post = require('../models/Post');
+const StoreItem = require('../models/StoreItem');
+const AccessLog = require('../models/AccessLog');
 const { sendAccountDeletionRequest } = require('../utils/emailService');
 
 /**
@@ -68,7 +71,11 @@ exports.updateProfile = async (req, res) => {
       'medicalAlerts',
       'medicalAlertsVisible',
       'medicalNotes',
-      'medicalNotesVisible'
+      'medicalNotesVisible',
+      'bloodType',
+      'bloodTypeVisible',
+      'allergies',
+      'allergiesVisible'
     ];
 
     // Build updates object with only whitelisted fields
@@ -180,6 +187,150 @@ exports.getQRAccessLogs = async (req, res) => {
     });
   }
 };
+
+/**
+ * @route   GET /api/user/dashboard-feed
+ * @desc    Get latest post, recent scans, and store items for dashboard/store UI
+ * @access  Private
+ */
+exports.getDashboardFeed = async (req, res) => {
+  try {
+    const [latestPost, recentScans, storeItems] = await Promise.all([
+      Post.findOne({ isActive: true })
+        .populate('comments.userId', 'firstName lastName username')
+        .sort({ createdAt: -1 }),
+      AccessLog.getRecentAccess(req.user.id, 8),
+      StoreItem.find({ isActive: true }).sort({ createdAt: -1 }).lean()
+    ]);
+
+    const post = latestPost ? buildUserPostView(latestPost, req.user.id) : null;
+    const scans = recentScans.map(mapScanForDashboard);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        latestPost: post,
+        recentScans: scans,
+        storeItems
+      }
+    });
+  } catch (error) {
+    console.error('Get dashboard feed error:', error);
+    res.status(500).json({ success: false, message: 'Error fetching dashboard feed' });
+  }
+};
+
+/**
+ * @route   POST /api/user/posts/:postId/reactions
+ * @desc    Add or update a reaction to latest admin post
+ * @access  Private
+ */
+exports.reactToPost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const { reactionType } = req.body;
+
+    if (!['like', 'love', 'support'].includes(reactionType)) {
+      return res.status(400).json({ success: false, message: 'Invalid reaction type' });
+    }
+
+    const post = await Post.findById(postId).populate('comments.userId', 'firstName lastName username');
+
+    if (!post) {
+      return res.status(404).json({ success: false, message: 'Post not found' });
+    }
+
+    const existingReaction = post.reactions.find(reaction => String(reaction.userId) === req.user.id);
+
+    if (existingReaction) {
+      existingReaction.reactionType = reactionType;
+      existingReaction.reactedAt = new Date();
+    } else {
+      post.reactions.push({ userId: req.user.id, reactionType });
+    }
+
+    await post.save();
+
+    res.status(200).json({ success: true, data: buildUserPostView(post, req.user.id) });
+  } catch (error) {
+    console.error('React to post error:', error);
+    res.status(500).json({ success: false, message: 'Error reacting to post' });
+  }
+};
+
+/**
+ * @route   POST /api/user/posts/:postId/comments
+ * @desc    Comment on an admin post
+ * @access  Private
+ */
+exports.commentOnPost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const { comment } = req.body;
+
+    if (!comment || !comment.trim()) {
+      return res.status(400).json({ success: false, message: 'Comment is required' });
+    }
+
+    const post = await Post.findById(postId).populate('comments.userId', 'firstName lastName username');
+
+    if (!post) {
+      return res.status(404).json({ success: false, message: 'Post not found' });
+    }
+
+    post.comments.push({ userId: req.user.id, comment: comment.trim() });
+    await post.save();
+    await post.populate('comments.userId', 'firstName lastName username');
+
+    res.status(201).json({ success: true, data: buildUserPostView(post, req.user.id) });
+  } catch (error) {
+    console.error('Comment on post error:', error);
+    res.status(500).json({ success: false, message: 'Error commenting on post' });
+  }
+};
+
+function buildUserPostView(post, userId) {
+  const reactionCounts = post.reactions.reduce((acc, reaction) => {
+    acc[reaction.reactionType] = (acc[reaction.reactionType] || 0) + 1;
+    return acc;
+  }, { like: 0, love: 0, support: 0 });
+
+  return {
+    id: post._id,
+    title: post.title,
+    content: post.content,
+    imageUrl: post.imageUrl,
+    adminName: post.adminName,
+    createdAt: post.createdAt,
+    reactionCounts,
+    reactionCount: post.reactions.length,
+    commentCount: post.comments.length,
+    currentUserReaction: post.reactions.find(reaction => String(reaction.userId) === String(userId))?.reactionType || null,
+    comments: post.comments.map(entry => ({
+      id: entry._id,
+      comment: entry.comment,
+      commentedAt: entry.commentedAt,
+      author: entry.userId
+        ? [entry.userId.firstName, entry.userId.lastName].filter(Boolean).join(' ') || entry.userId.username || 'User'
+        : 'User'
+    }))
+  };
+}
+
+function mapScanForDashboard(log) {
+  const city = log.location && (log.location.city || log.location.region || log.location.country)
+    ? (log.location.city || log.location.region || log.location.country)
+    : 'Location unavailable';
+
+  return {
+    id: log._id,
+    scannedAt: log.accessedAt,
+    location: city,
+    device: log.device && log.device.browser
+      ? `${log.device.browser}${log.device.os ? ` on ${log.device.os}` : ''}`
+      : (log.userAgent || 'Unknown device')
+  };
+}
 
 /**
  * Mask IP address for privacy (e.g., 192.168.*.*)  

@@ -39,7 +39,36 @@
         <div class="welcome-banner">
           <h2>Welcome to Your SafePass Dashboard</h2>
           <p>Manage your emergency information securely. Only the details you choose will be visible when needed.</p>
+          <div id="verification-status" class="verified-pill hidden">✔ Verified SafePassID</div>
         </div>
+
+        <section class="card announcement-card hidden" id="latest-post-card">
+          <div class="card-header announcement-header">
+            <div>
+              <h3>📢 Latest Announcement</h3>
+              <p id="post-meta" class="announcement-meta"></p>
+            </div>
+            <div class="post-counters">
+              <span id="post-reaction-count">👍 0 reactions</span>
+              <span id="post-comment-count">💬 0 comments</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <h4 id="post-title"></h4>
+            <p id="post-content"></p>
+            <img id="post-image" class="announcement-image hidden" alt="Announcement image">
+            <div class="reaction-bar" id="reaction-bar">
+              <button type="button" class="reaction-btn" data-reaction="like">👍 Like</button>
+              <button type="button" class="reaction-btn" data-reaction="love">❤️ Love</button>
+              <button type="button" class="reaction-btn" data-reaction="support">🤝 Support</button>
+            </div>
+            <form id="post-comment-form" class="comment-form">
+              <input type="text" id="post-comment-input" placeholder="Add a comment" maxlength="500">
+              <button type="submit" class="btn-secondary">Comment</button>
+            </form>
+            <div id="post-comments" class="comment-list"></div>
+          </div>
+        </section>
 
         <!-- Two Column Layout -->
         <div class="dashboard-grid">
@@ -199,6 +228,24 @@
 
                 <form id="medical-form" class="medical-notes-form">
                   <div class="form-group">
+                    <label for="bloodType">Blood Type</label>
+                    <input type="text" id="bloodType" placeholder="e.g., O+">
+                    <label class="checkbox-container">
+                      <input type="checkbox" id="bloodTypeVisible">
+                      <span>Make blood type visible publicly</span>
+                    </label>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="allergies">Allergies</label>
+                    <input type="text" id="allergies" placeholder="Separate allergies with commas">
+                    <label class="checkbox-container">
+                      <input type="checkbox" id="allergiesVisible">
+                      <span>Make allergies visible publicly</span>
+                    </label>
+                  </div>
+
+                  <div class="form-group">
                     <label for="medical-notes">Private Medical Notes</label>
                     <textarea id="medical-notes" rows="4" placeholder="Add private notes here (not shared publicly)"></textarea>
                     <label class="checkbox-container">
@@ -336,6 +383,18 @@
                   <a id="download-png" class="btn-download btn-hidden">
                     🖼️ Download PNG
                   </a>
+                </div>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="card-header">
+                <h3>🛰️ Recent QR Scans</h3>
+                <p class="header-subtitle">The latest times your SafePassID profile was opened</p>
+              </div>
+              <div class="card-body">
+                <div id="recent-scans" class="scan-list">
+                  <p class="empty-state">No scans recorded yet.</p>
                 </div>
               </div>
             </section>

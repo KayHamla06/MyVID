@@ -34,6 +34,15 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  verified: {
+    type: Boolean,
+    default: false
+  },
+  verifiedMethod: {
+    type: String,
+    enum: ['email', 'phone', null],
+    default: null
+  },
   // Public Profile Username (for QR codes)
   username: {
     type: String,
@@ -208,6 +217,24 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  bloodType: {
+    type: String,
+    trim: true,
+    maxlength: [10, 'Blood type cannot exceed 10 characters']
+  },
+  bloodTypeVisible: {
+    type: Boolean,
+    default: false
+  },
+  allergies: [{
+    type: String,
+    trim: true,
+    maxlength: [200, 'Allergy cannot exceed 200 characters']
+  }],
+  allergiesVisible: {
+    type: Boolean,
+    default: false
+  },
 
   // QR Code Configuration
   qrId: {
@@ -365,6 +392,9 @@ UserSchema.methods.getSafeProfile = function () {
   return {
     id: this._id,
     email: this.email,
+    username: this.username,
+    verified: this.verified,
+    verifiedMethod: this.verifiedMethod,
     firstName: this.firstName,
     firstNameVisible: this.firstNameVisible,
     lastName: this.lastName,
@@ -394,8 +424,13 @@ UserSchema.methods.getSafeProfile = function () {
     medicalAlertsVisible: this.medicalAlertsVisible,
     medicalNotes: this.medicalNotes,
     medicalNotesVisible: this.medicalNotesVisible,
+    bloodType: this.bloodType,
+    bloodTypeVisible: this.bloodTypeVisible,
+    allergies: this.allergies,
+    allergiesVisible: this.allergiesVisible,
     qrId: this.qrId,
     qrEnabled: this.qrEnabled,
+    qrScanCount: this.qrScanCount,
     createdAt: this.createdAt,
     lastLogin: this.lastLogin
   };
@@ -405,7 +440,20 @@ UserSchema.methods.getSafeProfile = function () {
 // ENFORCES server-side visibility filtering - backend truth
 UserSchema.methods.getPublicProfile = function () {
   // Only include fields marked as visible
+  const visibleAddressParts = [
+    this.houseNumberVisible ? this.houseNumber : null,
+    this.streetNameVisible ? this.streetName : null,
+    this.suburbVisible ? this.suburb : null,
+    this.townVisible ? this.town : null,
+    this.postalCodeVisible ? this.postalCode : null,
+    this.provinceVisible ? this.province : null
+  ].filter(Boolean);
+
   const publicData = {
+    id: this._id,
+    username: this.username,
+    verified: this.verified,
+    verifiedMethod: this.verifiedMethod,
     firstName: this.firstNameVisible ? this.firstName : null,
     lastName: this.lastNameVisible ? this.lastName : null,
     country: this.countryVisible ? this.country : null,
@@ -416,6 +464,7 @@ UserSchema.methods.getPublicProfile = function () {
     town: this.townVisible ? this.town : null,
     postalCode: this.postalCodeVisible ? this.postalCode : null,
     province: this.provinceVisible ? this.province : null,
+    address: visibleAddressParts.join(', '),
     dateOfBirth: this.dateOfBirthVisible ? this.dateOfBirth : null,
     profilePhoto: this.profilePhoto,
     emergencyContacts: this.emergencyContactsVisible 
@@ -425,7 +474,21 @@ UserSchema.methods.getPublicProfile = function () {
       }))
       : [],
     medicalAlerts: this.medicalAlertsVisible ? this.medicalAlerts : [],
-    medicalNotes: this.medicalNotesVisible ? this.medicalNotes : null
+    medicalNotes: this.medicalNotesVisible ? this.medicalNotes : null,
+    bloodType: this.bloodTypeVisible ? this.bloodType : null,
+    allergies: this.allergiesVisible ? this.allergies : [],
+    emergencyMode: {
+      emergencyContacts: this.emergencyContactsVisible
+        ? this.emergencyContacts.filter(c => c.isPublic).map(c => ({
+          name: c.name,
+          phone: c.phone
+        }))
+        : [],
+      medicalAlerts: this.medicalAlertsVisible ? this.medicalAlerts : [],
+      medicalNotes: this.medicalNotesVisible ? this.medicalNotes : null,
+      bloodType: this.bloodTypeVisible ? this.bloodType : null,
+      allergies: this.allergiesVisible ? this.allergies : []
+    }
   };
 
   // Remove null/empty fields to keep JSON clean

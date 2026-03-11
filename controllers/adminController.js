@@ -1,6 +1,10 @@
 const User = require('../models/User');
+const Post = require('../models/Post');
+const StoreItem = require('../models/StoreItem');
+const AccessLog = require('../models/AccessLog');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
+const { cloudinary } = require('../config/cloudinary');
 const { sendAdminPasswordReset } = require('../utils/emailService');
 
 /**
@@ -39,6 +43,11 @@ exports.getStats = async (req, res) => {
     // Get users with at least one login (activity)
     const activeUsers = await User.countDocuments({ lastLogin: { $exists: true, $ne: null } });
 
+    const activePost = await Post.findOne({ isActive: true }).select('title createdAt adminName').sort({ createdAt: -1 }).lean();
+    const totalPosts = await Post.countDocuments({});
+    const totalStoreItems = await StoreItem.countDocuments({ isActive: true });
+    const totalScans = await AccessLog.countDocuments({});
+
     // Get recent logins
     const recentLogins = await User.find({ lastLogin: { $exists: true, $ne: null } })
       .select('email firstName lastLogin')
@@ -52,7 +61,11 @@ exports.getStats = async (req, res) => {
         activeQRProfiles,
         totalUsers,
         activeUsers,
-        recentLogins
+        recentLogins,
+        activePost,
+        totalPosts,
+        totalStoreItems,
+        totalScans
       }
     });
 
@@ -97,7 +110,7 @@ exports.getUsers = async (req, res) => {
     }
 
     const users = await User.find(searchQuery)
-      .select('email firstName phoneNumber country accountStatus qrEnabled createdAt lastLogin')
+      .select('email username firstName lastName phoneNumber country accountStatus qrEnabled qrScanCount createdAt lastLogin verified verifiedMethod')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -141,7 +154,7 @@ exports.getUserDetail = async (req, res) => {
     }
 
     const { userId } = req.params;
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select('-password -passwordResetToken -passwordResetExpires');
 
     if (!user) {
       return res.status(404).json({
@@ -183,11 +196,15 @@ exports.editUser = async (req, res) => {
     const { userId } = req.params;
     const allowedFields = [
       'firstName',
+      'lastName',
       'phoneNumber',
       'country',
       'accountStatus',
       'medicalAlerts',
-      'fullDetails'
+      'bloodType',
+      'allergies',
+      'verified',
+      'verifiedMethod'
     ];
 
     const updates = {};
@@ -330,3 +347,151 @@ exports.deleteUser = async (req, res) => {
     });
   }
 };
+
+/**
+ * @route   GET /api/admin/posts
+ * @desc    Get all posts for admin history
+ * @access  Admin only
+ */
+exports.getPosts = async (req, res) => {
+  try {
+    const adminSecret = req.headers['x-admin-secret'];
+
+    if (!isAdmin(adminSecret)) {
+      return res.status(403).json({ success: false, message: 'Unauthorized - Invalid admin credentials' });
+    }
+
+    const posts = await Post.find({})
+      .populate('reactions.userId', 'firstName lastName email username')
+      .populate('comments.userId', 'firstName lastName email username')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.status(200).json({ success: true, data: posts });
+  } catch (error) {
+    console.error('Get posts error:', error);
+    res.status(500).json({ success: false, message: 'Error fetching posts' });
+  }
+};
+
+/**
+ * @route   POST /api/admin/posts
+ * @desc    Create a new admin announcement post and make it the latest active post
+ * @access  Admin only
+ */
+exports.createPost = async (req, res) => {
+  try {
+    const adminSecret = req.headers['x-admin-secret'];
+
+    if (!isAdmin(adminSecret)) {
+      return res.status(403).json({ success: false, message: 'Unauthorized - Invalid admin credentials' });
+    }
+
+    const { title, content, adminName } = req.body;
+
+    if (!title || !content || !adminName) {
+      return res.status(400).json({ success: false, message: 'Title, content, and admin name are required' });
+    }
+
+    let imageUrl = null;
+    if (req.file && req.file.buffer) {
+      imageUrl = await uploadBuffer(req.file.buffer, 'admin-posts');
+    }
+
+    await Post.updateMany({ isActive: true }, { $set: { isActive: false } });
+
+    const post = await Post.create({
+      title: title.trim(),
+      content: content.trim(),
+      adminName: adminName.trim(),
+      imageUrl,
+      isActive: true
+    });
+
+    res.status(201).json({ success: true, data: post, message: 'Post created successfully' });
+  } catch (error) {
+    console.error('Create post error:', error);
+    res.status(500).json({ success: false, message: 'Error creating post' });
+  }
+};
+
+/**
+ * @route   GET /api/admin/store-items
+ * @desc    Get store items for admin
+ * @access  Admin only
+ */
+exports.getStoreItems = async (req, res) => {
+  try {
+    const adminSecret = req.headers['x-admin-secret'];
+
+    if (!isAdmin(adminSecret)) {
+      return res.status(403).json({ success: false, message: 'Unauthorized - Invalid admin credentials' });
+    }
+
+    const items = await StoreItem.find({}).sort({ createdAt: -1 }).lean();
+    res.status(200).json({ success: true, data: items });
+  } catch (error) {
+    console.error('Get store items error:', error);
+    res.status(500).json({ success: false, message: 'Error fetching store items' });
+  }
+};
+
+/**
+ * @route   POST /api/admin/store-items
+ * @desc    Create a new store item
+ * @access  Admin only
+ */
+exports.createStoreItem = async (req, res) => {
+  try {
+    const adminSecret = req.headers['x-admin-secret'];
+
+    if (!isAdmin(adminSecret)) {
+      return res.status(403).json({ success: false, message: 'Unauthorized - Invalid admin credentials' });
+    }
+
+    const { name, description, price, category } = req.body;
+
+    if (!name || !description || !price || !category) {
+      return res.status(400).json({ success: false, message: 'Name, description, price, and category are required' });
+    }
+
+    if (!req.file || !req.file.buffer) {
+      return res.status(400).json({ success: false, message: 'Item image is required' });
+    }
+
+    const imageUrl = await uploadBuffer(req.file.buffer, 'store-items');
+
+    const item = await StoreItem.create({
+      name: name.trim(),
+      description: description.trim(),
+      price: Number(price),
+      category: category.trim(),
+      imageUrl
+    });
+
+    res.status(201).json({ success: true, data: item, message: 'Store item created successfully' });
+  } catch (error) {
+    console.error('Create store item error:', error);
+    res.status(500).json({ success: false, message: 'Error creating store item' });
+  }
+};
+
+function uploadBuffer(buffer, folder) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: `safepassid/${folder}`,
+        resource_type: 'image'
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve(result.secure_url);
+      }
+    );
+
+    stream.end(buffer);
+  });
+}

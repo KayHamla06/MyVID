@@ -1,12 +1,17 @@
 const express = require('express');
 const router = express.Router();
+const { upload } = require('../config/cloudinary');
 const {
   getStats,
   getUsers,
   getUserDetail,
   editUser,
   resetUserPassword,
-  deleteUser
+  deleteUser,
+  getPosts,
+  createPost,
+  getStoreItems,
+  createStoreItem
 } = require('../controllers/adminController');
 
 /**
@@ -55,5 +60,11 @@ router.post('/users/:userId/reset-password', resetUserPassword);
  * @access  Admin only
  */
 router.delete('/users/:userId', deleteUser);
+
+router.get('/posts', getPosts);
+router.post('/posts', upload.single('image'), createPost);
+
+router.get('/store-items', getStoreItems);
+router.post('/store-items', upload.single('image'), createStoreItem);
 
 module.exports = router;

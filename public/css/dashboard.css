@@ -544,6 +544,225 @@ button {
   border-left: 4px solid var(--color-danger);
 }
 
+.hidden {
+  display: none !important;
+}
+
+.verified-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(76, 175, 80, 0.12);
+  color: var(--color-success);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.announcement-card {
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(95, 167, 180, 0.18);
+  box-shadow: var(--shadow-md);
+}
+
+.announcement-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.announcement-meta {
+  color: var(--color-text-light);
+  font-size: 0.9rem;
+}
+
+.announcement-image {
+  width: 100%;
+  max-height: 260px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  margin-top: 1rem;
+}
+
+.reaction-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.reaction-btn {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-radius: 999px;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 600;
+}
+
+.reaction-btn:hover,
+.reaction-btn.active {
+  background: var(--color-primary);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.reaction-btn.bump {
+  animation: reactionPop 0.28s ease;
+}
+
+@keyframes reactionPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+.post-counters {
+  display: flex;
+  gap: 1rem;
+  color: var(--color-text-light);
+  font-size: 0.92rem;
+}
+
+.comment-form {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.comment-form input {
+  flex: 1;
+}
+
+.comment-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.comment-item {
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius);
+  background: var(--color-bg);
+}
+
+.comment-author {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.scan-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.scan-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+}
+
+.scan-meta {
+  color: var(--color-text-light);
+  font-size: 0.92rem;
+}
+
+.store-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.store-sort {
+  min-width: 220px;
+}
+
+.store-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1rem;
+}
+
+.store-item-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.store-item-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.store-item-body {
+  padding: 1rem;
+}
+
+.store-item-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0.75rem 0;
+  color: var(--color-text-light);
+  font-size: 0.92rem;
+}
+
+.btn-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-section-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 1.5rem;
+}
+
+.admin-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.admin-user-card,
+.admin-history-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: white;
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-user-card h4,
+.admin-history-card h4 {
+  margin-bottom: 0.5rem;
+}
+
+.admin-data-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.3rem 0;
+  color: var(--color-text-light);
+}
+
 @keyframes slideIn {
   from {
     transform: translateX(400px);
@@ -616,6 +835,10 @@ button {
   .qr-card {
     position: static;
   }
+
+  .admin-section-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
@@ -663,6 +886,12 @@ button {
   }
 
   .download-buttons {
+    flex-direction: column;
+  }
+
+  .comment-form,
+  .store-toolbar,
+  .scan-item {
     flex-direction: column;
   }
 }

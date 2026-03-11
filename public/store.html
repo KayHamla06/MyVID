@@ -34,17 +34,25 @@
     <div class="dashboard-container">
       <div class="welcome-banner">
         <h2>🏪 SafePass ID Store</h2>
-        <p>Exclusive jewelry collection coming soon</p>
+        <p>Browse the latest SafePassID items from the admin catalog.</p>
       </div>
 
-      <section class="card coming-soon-card">
+      <section class="card">
         <div class="card-body">
-          <div class="coming-soon-content">
-            <span class="coming-soon-icon">🎁</span>
-            <h3>Coming Soon</h3>
-            <p>We're preparing an exclusive jewelry collection for you. Stay tuned!</p>
-            <p class="store-description">Our collection will feature beautiful, durable jewelry pieces with integrated QR codes for your SafePass ID profile.</p>
+          <div class="store-toolbar">
+            <div>
+              <h3>Available Items</h3>
+              <p class="store-description">Products created by the admin will appear here automatically.</p>
+            </div>
+            <select id="store-sort" class="store-sort" aria-label="Sort store items">
+              <option value="createdAt-desc">Newest First</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="name-asc">Name: A-Z</option>
+              <option value="category-asc">Category: A-Z</option>
+            </select>
           </div>
+          <div id="store-items" class="store-grid"></div>
         </div>
       </section>
 
